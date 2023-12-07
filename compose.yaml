@@ -1,0 +1,28 @@
+services:
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres_yrs_api
+    ports:
+      - 38080:8080
+    networks:
+      - yrs-api-network
+  postgres_yrs_api:
+    image: 'postgres:15'
+    volumes:
+      - postgres-yrs-api:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=your_rents_api'
+      - 'POSTGRES_PASSWORD=your_rents_api'
+      - 'POSTGRES_USER=your_rents_api'
+    ports:
+      - 25432:5432
+    networks:
+      - yrs-api-network
+volumes:
+  postgres-yrs-api:
+    driver: local
+networks:
+  yrs-api-network:
+    driver: bridge
