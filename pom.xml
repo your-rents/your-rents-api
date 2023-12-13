@@ -209,6 +209,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<name>yourrents/your-rents-api:latest</name>
+					</image>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
