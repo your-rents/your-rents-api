@@ -1,0 +1,28 @@
+services:
+  yrs-api:
+    image: 'yourrents/your-rents-api:latest'
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - 8080:8080
+    networks:
+      - yrs-network
+    depends_on:
+      - yrs-db
+  yrs-db:
+    image: 'postgres:15'
+    volumes:
+      - yrs-db:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=your_rents_api'
+      - 'POSTGRES_PASSWORD=your_rents_api'
+      - 'POSTGRES_USER=your_rents_api'
+    networks:
+      - yrs-network
+volumes:
+  yrs-db:
+    driver: local
+networks:
+  yrs-network:
+    driver: bridge
