@@ -54,31 +54,17 @@ If you need a fresh database:
 
 - Then restart the service
 
-## Running the service alone
+## Running the executable JAR
 
-If you have a PostgreSQL database running on your machine, you can run the service alone.
+You need a PostgreSQL database running somewhere (local, remote, in a docker container, etc.).
 
-First, create the database (using the `postgres`` user):
+For example, in your local machine, create the database (using the `postgres`` user):
 
 ```shell
 postgres@yourhost:~$ createuser -P your_rents_api
 Insert the password for the new role: <secret>
 Confirm password: <secret>
 postgres@yourhost:~$ createdb -O your_rents_api -E UTF-8 your_rents_api
-```
-
-Of course, you also need to grant the access to the database.
-
-For example, in the `postgresql.conf` file:
-
-```properties
-listen_addresses = '*'
-```
-
-And in the `pg_hba.conf` file:
-
-```text
-host    your_rents_api    your_rents_api    samenet    scram-sha-256
 ```
 
 Then, run the service using the `target/your-rents-api-0.0.1-SNAPSHOT.jar` file:
