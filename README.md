@@ -102,7 +102,7 @@ Try the services at <http://localhost:8080/swagger-ui.html>.
 
 If you have a PostgreSQL database running on your machine, you can run the service alone.
 
-First, create the database (using the `postgres`` user):
+First, create the database (using the `postgres` user):
 
 ```shell
 postgres@yourhost:~$ createuser -P your_rents_api
