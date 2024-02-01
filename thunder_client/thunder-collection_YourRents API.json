@@ -1,0 +1,56 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "YourRents API",
+    "dateExported": "2024-01-20T09:52:27.502Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "8e6fa1e7-ecc6-4961-8248-b47b075335a6",
+            "colId": "4b3b44af-0534-4ae2-b000-a26ec3ae2335",
+            "containerId": "",
+            "name": "GET provinces",
+            "url": "/geodata/provinces",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-01-19T18:19:23.286Z",
+            "modified": "2024-01-19T18:19:58.379Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "2a96fc3c-0708-4d1c-8467-0487c897c8d2",
+            "colId": "4b3b44af-0534-4ae2-b000-a26ec3ae2335",
+            "containerId": "",
+            "name": "GET regions",
+            "url": "/geodata/regions",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-01-19T18:34:54.135Z",
+            "modified": "2024-01-19T18:35:07.383Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ],
+    "settings": {
+        "auth": {
+            "type": "oauth2",
+            "oauth2": {
+                "grantType": "password",
+                "tokenUrl": "{{token_url}}",
+                "clientId": "{{client_id}}",
+                "clientSecret": "{{client_secret}}",
+                "clientAuth": "in-header",
+                "scope": "openid profile email",
+                "username": "{{username}}",
+                "password": "{{password}}"
+            }
+        },
+        "options": {
+            "baseUrl": "http://localhost:8080/api/v1/yourrents"
+        },
+        "envId": "3f915761-8b32-4764-bbdd-cf53d5cf633a"
+    }
+}

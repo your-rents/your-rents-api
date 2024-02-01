@@ -8,8 +8,12 @@ services:
       - 8080:8080
     networks:
       - yrs-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "keycloak.local:host-gateway"
     depends_on:
-      - yrs-db
+      yrs-db:
+        condition: service_healthy
   yrs-db:
     image: 'postgres:15'
     volumes:
@@ -18,10 +22,55 @@ services:
       - 'POSTGRES_DB=your_rents_api'
       - 'POSTGRES_PASSWORD=your_rents_api'
       - 'POSTGRES_USER=your_rents_api'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U your_rents_api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - yrs-network
+  keycloak_db:
+    image: 'postgres:15'
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=keycloak'
+      - 'POSTGRES_PASSWORD=keycloak'
+      - 'POSTGRES_USER=keycloak'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - yrs-network
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
+    command:
+      - start-dev
+      - --db=postgres
+      - --db-url=jdbc:postgresql://keycloak_db:5432/keycloak
+      - --db-username=keycloak
+      - --db-password=keycloak
+      - --import-realm
+    volumes:
+      - ./keycloak/your-rents-realm.json:/opt/keycloak/data/import/your-rents-realm.json
+    ports:
+      - 18080:8080
+    networks:
+      - yrs-network
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
 volumes:
   yrs-db:
+    driver: local
+  keycloak-db:
     driver: local
 networks:
   yrs-network:

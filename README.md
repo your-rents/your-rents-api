@@ -134,3 +134,107 @@ docker run --rm -it -p 8080:8080 --add-host host.docker.internal:host-gateway \
   -e SPRING_DATASOURCE_PASSWORD=<secret> \
   yourrents/your-rents-api
 ```
+
+## Calling the service
+
+The service is protected by an API key, using Keycloak for authentication and authorization.
+
+For simplicity, assign a domain name to the KeyCloak server, for example `keycloak.local`, and add the following line to your `/etc/hosts` file:
+
+```text
+127.0.0.1 localhost keycloak.local
+```
+
+The Keycloak server is available at <http://keycloak.local:18080>. You can access the administration console with the `admin` user and the `Pa55w0rd` password.
+
+### Calling the service in development
+
+In development, launching the service with `./mvnw spring-boot:run` (or with the plugins of your IDE), the service environment is launched using docker compose with the `compose.yml` file.
+
+#### Using `curl`
+
+Run the following command to get an access token:
+
+```shell
+TOKEN=$(curl -X POST \
+  http://localhost:18080/realms/your-rents/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d username=user \
+  -d password=user \
+  -d grant_type=password \
+  -d client_id=your-rents-api \
+  -d client_secret=ZEeQ3Zmhnm3NX6QPGlEpPOLB2OavM3GZ \
+  | jq -r .access_token)
+```
+  
+Then, use the token stored in the TOKEN variable and call the service, for example:
+  
+```shell
+curl -X 'GET' \
+  'http://localhost:8080/api/v1/yourrents/geodata/regions' \
+  -H 'accept: */*' \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Using Thunder Client
+
+If you use [Thunder Client](https://www.thunderclient.com) for VS Code, you can import the `thunder_client/thunder-collection_YourRents API.json` file, for importing a collection of requests, with authentication and authorization already configured.
+
+The configuration of the collection is based on some environment variables.
+
+Load the environment variables from the `thunder_client/thunder-environment_YourRents development.json` file, and activate it, or attach it to the collection.
+
+Then, you can run the requests and get the responses.
+
+#### Using Swagger UI
+
+You can also use the Swagger UI at <http://localhost:8080/swagger-ui.html> to call the services.
+
+Authenticate using the token obtained with the `curl` command.
+
+### Calling the service deployed with Docker Compose
+
+You can deploy the service with Docker Compose using the `docker-compose-yrs-api.yml` file.
+
+#### Using `curl`
+
+Run the following command to get an access token:
+
+```shell
+TOKEN=$(curl -X POST \
+  http://keycloak.local:18080/realms/your-rents/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d username=user \
+  -d password=user \
+  -d grant_type=password \
+  -d client_id=your-rents-api \
+  -d client_secret=ZEeQ3Zmhnm3NX6QPGlEpPOLB2OavM3GZ \
+  | jq -r .access_token)
+```
+
+(remember to assign the `keycloak.local` domain name to the Keycloak server, as explained above)
+
+Then, use the token stored in the TOKEN variable and call the service, for example:
+  
+```shell
+curl -X 'GET' \
+  'http://localhost:8080/api/v1/yourrents/geodata/regions' \
+  -H 'accept: */*' \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Using Thunder Client
+
+If you use [Thunder Client](https://www.thunderclient.com) for VS Code, you can import the `thunder_client/thunder-collection_YourRents API.json` file, for importing a collection of requests, with authentication and authorization already configured.
+
+The configuration of the collection is based on some environment variables.
+
+Load the environment variables from the `thunder_client/thunder-environment_YourRents on Docker.json` file, and activate it, or attach it to the collection.
+
+Then, you can run the requests and get the responses.
+
+#### Using Swagger UI
+
+You can also use the Swagger UI at <http://localhost:8080/swagger-ui.html> to call the services.
+
+Authenticate using the token obtained with the `curl` command.
