@@ -18,10 +18,57 @@ services:
       - 'POSTGRES_USER=your_rents_api'
     ports:
       - 25432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U your_rents_api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - yrs-api-network
+  postgres_keycloak:
+    image: 'postgres:15'
+    volumes:
+      - postgres-keycloak:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=keycloak'
+      - 'POSTGRES_PASSWORD=keycloak'
+      - 'POSTGRES_USER=keycloak'
+    labels:
+      org.springframework.boot.ignore: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - yrs-api-network
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
+    command:
+      - start-dev
+      - --db=postgres
+      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak
+      - --db-username=keycloak
+      - --db-password=keycloak
+      - --import-realm
+    volumes:
+      - ./keycloak/your-rents-realm.json:/opt/keycloak/data/import/your-rents-realm.json
+    ports:
+      - 18080:8080
+    networks:
+      - yrs-api-network
+    depends_on:
+      postgres_keycloak:
+        condition: service_healthy
 volumes:
   postgres-yrs-api:
+    driver: local
+  postgres-keycloak:
     driver: local
 networks:
   yrs-api-network:

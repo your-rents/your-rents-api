@@ -1,0 +1,28 @@
+{
+    "client": "Thunder Client",
+    "environmentName": "YourRents on Docker",
+    "dateExported": "2024-02-01T17:10:50.872Z",
+    "version": "1.0",
+    "variables": [
+        {
+            "name": "client_secret",
+            "value": "ZEeQ3Zmhnm3NX6QPGlEpPOLB2OavM3GZ"
+        },
+        {
+            "name": "username",
+            "value": "user"
+        },
+        {
+            "name": "password",
+            "value": "user"
+        },
+        {
+            "name": "token_url",
+            "value": "http://keycloak.local:18080/realms/your-rents/protocol/openid-connect/token"
+        },
+        {
+            "name": "client_id",
+            "value": "your-rents-api"
+        }
+    ]
+}
