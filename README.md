@@ -244,3 +244,7 @@ Authenticate using the token obtained with the `curl` command.
 The service is configured to accept requests from the `http://localhost:4200` domain.
 
 You can change this configuration by setting the `yrs-api.cors.allowed-origins` property or the `YRS-API_CORS_ALLOWED-ORIGINS` environment variable with a comma-separated list of allowed origins.
+
+## See also
+
+- [Development notes](DEVELOPMENT.md)

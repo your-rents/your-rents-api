@@ -252,8 +252,33 @@
         "clientRole" : true,
         "containerId" : "a1d1afd6-c72f-4222-ad56-78977126b949",
         "attributes" : { }
+      }, {
+        "id" : "2d8b943c-a2d7-4892-b0ee-2eea52780273",
+        "name" : "ADMIN",
+        "description" : "Role for YourRents administrators",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "a1d1afd6-c72f-4222-ad56-78977126b949",
+        "attributes" : { }
       } ],
       "security-admin-console" : [ ],
+      "your-rents-ng" : [ {
+        "id" : "7bcca8f7-d67c-4454-8fad-53635b0d4ca7",
+        "name" : "USER",
+        "description" : "The default role for the user of the YourRents application.",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "b0b6babf-1975-4109-ac12-e6d5c49bf6f7",
+        "attributes" : { }
+      }, {
+        "id" : "c89989b4-f2a6-4588-b55c-52ea76da6b4b",
+        "name" : "ADMIN",
+        "description" : "Role for YourRents administrators",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "b0b6babf-1975-4109-ac12-e6d5c49bf6f7",
+        "attributes" : { }
+      } ],
       "admin-cli" : [ ],
       "account-console" : [ ],
       "broker" : [ {
@@ -342,7 +367,23 @@
       } ]
     }
   },
-  "groups" : [ ],
+  "groups" : [ {
+    "id" : "8b71cfbf-a184-4e50-ad4e-50e005e85fd9",
+    "name" : "your-rents-admins",
+    "path" : "/your-rents-admins",
+    "clientRoles" : {
+      "your-rents-api" : [ "ADMIN" ],
+      "your-rents-ng" : [ "ADMIN" ]
+    }
+  }, {
+    "id" : "e141e403-bdb3-45dc-908a-3848081e1f18",
+    "name" : "your-rents-users",
+    "path" : "/your-rents-users",
+    "clientRoles" : {
+      "your-rents-api" : [ "USER" ],
+      "your-rents-ng" : [ "USER" ]
+    }
+  } ],
   "defaultRole" : {
     "id" : "6cac5e3c-3f7d-479a-be59-91243c6a83bb",
     "name" : "default-roles-your-rents",
@@ -384,6 +425,29 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
   "users" : [ {
+    "id" : "75094a99-59eb-474c-9630-48290a8d8f24",
+    "createdTimestamp" : 1709297390037,
+    "username" : "admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Admin",
+    "lastName" : "User",
+    "email" : "admin-notexistant@yourrents.com",
+    "credentials" : [ {
+      "id" : "1048d548-c8f6-4052-b949-fba1fb0b99f7",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1709297409166,
+      "secretData" : "{\"value\":\"cGEO/coUKDmqulbkEQu4RQgBXaBMPNxCbp+dLwskV2I=\",\"salt\":\"6i8VnvnNVKPsSZc7Byg+kA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-your-rents" ],
+    "notBefore" : 0,
+    "groups" : [ "/your-rents-admins", "/your-rents-users" ]
+  }, {
     "id" : "f55c639e-f903-4dde-8b34-9aa36e624bf7",
     "createdTimestamp" : 1705745482202,
     "username" : "user",
@@ -404,11 +468,8 @@
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-your-rents" ],
-    "clientRoles" : {
-      "your-rents-api" : [ "USER" ]
-    },
     "notBefore" : 0,
-    "groups" : [ ]
+    "groups" : [ "/your-rents-users" ]
   } ],
   "scopeMappings" : [ {
     "clientScope" : "offline_access",
@@ -659,6 +720,42 @@
       "tls.client.certificate.bound.access.tokens" : "false",
       "display.on.consent.screen" : "false",
       "token.response.type.bearer.lower-case" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : true,
+    "nodeReRegistrationTimeout" : -1,
+    "defaultClientScopes" : [ "web-origins", "acr", "profile", "roles", "email" ],
+    "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+  }, {
+    "id" : "b0b6babf-1975-4109-ac12-e6d5c49bf6f7",
+    "clientId" : "your-rents-ng",
+    "name" : "YourRents Angular Frontend",
+    "description" : "The Angular frontend of the YourRents system.",
+    "rootUrl" : "",
+    "adminUrl" : "",
+    "baseUrl" : "",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "redirectUris" : [ "http://localhost:4200/*" ],
+    "webOrigins" : [ "http://localhost:4200" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : true,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : true,
+    "serviceAccountsEnabled" : false,
+    "publicClient" : true,
+    "frontchannelLogout" : true,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "oidc.ciba.grant.enabled" : "false",
+      "display.on.consent.screen" : "false",
+      "oauth2.device.authorization.grant.enabled" : "false",
+      "backchannel.logout.session.required" : "true",
+      "backchannel.logout.revoke.offline.tokens" : "false"
     },
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
@@ -1221,7 +1318,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper", "saml-user-attribute-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "saml-role-list-mapper" ]
       }
     }, {
       "id" : "03bafe40-83f0-44a2-a809-e3e8ac9c8929",
@@ -1230,7 +1327,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "saml-user-property-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-role-list-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper" ]
       }
     }, {
       "id" : "f6a6be5a-bc1c-4583-be8d-8bd2a54e1318",
