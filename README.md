@@ -90,10 +90,10 @@ The image contains just the application, not the database, that must be provided
 
 ### Running the service with Docker Compose
 
-A `docker-compose-yrs-api.yml` file is provided to run the service with Docker Compose:
+A `docker-compose-yrs-api.yaml` file is provided to run the service with Docker Compose:
 
 ```shell
-docker compose -f docker-compose-yrs-api.yml up
+docker compose -f docker-compose-yrs-api.yaml up
 ```
 
 Try the services at <http://localhost:8080/swagger-ui.html>.

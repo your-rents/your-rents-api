@@ -20,19 +20,18 @@ package com.yourrents.api;
  * #L%
  */
 
+import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
+import com.yourrents.services.common.searchable.springdoc.SearchableOpenAPIConverter;
+import com.yourrents.services.common.searchable.springdoc.customizer.SearchableOperationCustomizer;
 import org.springdoc.core.providers.ObjectMapperProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
-import com.yourrents.services.common.searchable.springdoc.SearchableOpenAPIConverter;
-import com.yourrents.services.common.searchable.springdoc.customizer.SearchableOperationCustomizer;
-
 @Configuration
-public class SearchableConfiguration {
+class SearchableConfiguration {
 
     @Bean
-    public SearchableArgumentResolverConfigurer searchableArgumentResolverConfigurer() {
+    SearchableArgumentResolverConfigurer searchableArgumentResolverConfigurer() {
         return new SearchableArgumentResolverConfigurer();
     }
 
