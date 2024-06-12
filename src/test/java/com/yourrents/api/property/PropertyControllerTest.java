@@ -68,15 +68,10 @@ class PropertyControllerTest {
         .andExpect(jsonPath("$.content[0].name", is("my flat")))
         .andExpect(jsonPath("$.content[1].name", is("my house")))
         .andExpect(jsonPath("$.content[2].name", is("penthouse")))
-        .andExpect(jsonPath("$.totalPages", is(1)))
-        .andExpect(jsonPath("$.totalElements", is(NUM_PROPERTIES)))
-        .andExpect(jsonPath("$.last", is(true)))
-        .andExpect(jsonPath("$.first", is(true)))
-        .andExpect(jsonPath("$.size", is(2147483647)))
-        .andExpect(jsonPath("$.number", is(0)))
-        .andExpect(jsonPath("$.numberOfElements", is(NUM_PROPERTIES)))
-        .andExpect(jsonPath("$.empty", is(false)))
-        .andExpect(jsonPath("$.sort.sorted", is(true)));
+        .andExpect(jsonPath("$.page.totalPages", is(1)))
+        .andExpect(jsonPath("$.page.totalElements", is(NUM_PROPERTIES)))
+        .andExpect(jsonPath("$.page.size", is(2147483647)))
+        .andExpect(jsonPath("$.page.number", is(0)));
   }
 
 
@@ -102,15 +97,10 @@ class PropertyControllerTest {
         .andExpect(jsonPath("$.content").isArray())
         .andExpect(jsonPath("$.content", hasSize(1)))
         .andExpect(jsonPath("$.content[0].name", is("penthouse")))
-        .andExpect(jsonPath("$.totalPages", is(3)))
-        .andExpect(jsonPath("$.totalElements", is(NUM_PROPERTIES)))
-        .andExpect(jsonPath("$.last", is(false)))
-        .andExpect(jsonPath("$.first", is(true)))
-        .andExpect(jsonPath("$.size", is(1)))
-        .andExpect(jsonPath("$.number", is(0)))
-        .andExpect(jsonPath("$.numberOfElements", is(1)))
-        .andExpect(jsonPath("$.empty", is(false)))
-        .andExpect(jsonPath("$.sort.sorted", is(true)));
+        .andExpect(jsonPath("$.page.totalPages", is(3)))
+        .andExpect(jsonPath("$.page.totalElements", is(NUM_PROPERTIES)))
+        .andExpect(jsonPath("$.page.size", is(1)))
+        .andExpect(jsonPath("$.page.number", is(0)));
   }
 
 }
