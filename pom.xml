@@ -72,6 +72,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
 		<springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
+    <maven.compiler.release>${java.version}</maven.compiler.release>
+    <spring-boot.version>3.2.1</spring-boot.version>
+    <springdoc-openapi-ui.version>2.3.0</springdoc-openapi-ui.version>
+    <testcontainers-jooq-codegen-maven-plugin.version>0.0.3</testcontainers-jooq-codegen-maven-plugin.version>
+    <plugins.testcontainers.version>1.19.3</plugins.testcontainers.version>
+    <plugins.postgresql.version>42.7.1</plugins.postgresql.version>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -216,6 +223,64 @@
 					</execution>
 				</executions>
 			</plugin>
+
+      <plugin>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
+        <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${plugins.testcontainers.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${plugins.postgresql.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <?m2e execute onConfiguration?>
+            <id>generate-jooq-sources</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <database>
+                <type>POSTGRES</type>
+                <containerImage>postgres:15-alpine</containerImage>
+              </database>
+              <flyway>
+                <createSchemas>true</createSchemas>
+                <schemas>
+                  yrs_api
+                </schemas>
+                <locations>
+                  filesystem:${project.basedir}/src/main/resources/yrs-api/db/migration
+                </locations>
+              </flyway>
+              <jooq>
+                <generator>
+                  <database>
+                    <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                    <includes>.*</includes>
+                    <excludes>flyway_schema_history</excludes>
+                    <inputSchema>yrs_api</inputSchema>
+                  </database>
+                  <target>
+                    <packageName>com.yourrents.api.jooq</packageName>
+                    <directory>target/generated-sources/jooq</directory>
+                  </target>
+                </generator>
+              </jooq>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -225,6 +290,8 @@
 					</image>
 				</configuration>
 			</plugin>
+
+
 		</plugins>
 	</build>
 

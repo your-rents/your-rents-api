@@ -21,13 +21,12 @@ package com.yourrents.api.security;
  */
 
 import java.util.Optional;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "token.converter")
-public class TokenConverterProperties {
+class TokenConverterProperties {
   private String resourceId;
   private String principalAttribute;
 

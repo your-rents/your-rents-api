@@ -1,7 +1,5 @@
 package com.yourrents.api.security;
 
-import org.springframework.beans.factory.annotation.Value;
-
 /*-
  * #%L
  * YourRents API
@@ -22,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
  * #L%
  */
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,22 +33,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration {
+class SecurityConfiguration {
 
     private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
 
-    @Value("${yrs-api.cors.allowed-origins}")
-    private String allowedOrigins;
+  private final String allowedOrigins;
 
-    public SecurityConfiguration(TokenConverterProperties properties) {
+  SecurityConfiguration(TokenConverterProperties properties,
+      @Value("${yrs-api.cors.allowed-origins}") String allowedOrigins) {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
         this.keycloakJwtTokenConverter =
                 new KeycloakJwtTokenConverter(jwtGrantedAuthoritiesConverter, properties);
+    this.allowedOrigins = allowedOrigins;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/actuator/**").permitAll().requestMatchers("/api/**")
@@ -62,7 +62,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
+    WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {

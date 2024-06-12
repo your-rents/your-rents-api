@@ -20,6 +20,12 @@ package com.yourrents.api.security;
  * #L%
  */
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -31,11 +37,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public class KeycloakJwtTokenConverter implements Converter<Jwt, JwtAuthenticationToken> {
+class KeycloakJwtTokenConverter implements Converter<Jwt, JwtAuthenticationToken> {
 
   private static final Logger log = LoggerFactory.getLogger(KeycloakJwtTokenConverter.class);
   private static final String RESOURCE_ACCESS = "resource_access";
@@ -44,7 +46,7 @@ public class KeycloakJwtTokenConverter implements Converter<Jwt, JwtAuthenticati
   private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter;
   private final TokenConverterProperties properties;
 
-  public KeycloakJwtTokenConverter(JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter,
+  KeycloakJwtTokenConverter(JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter,
       TokenConverterProperties properties) {
     this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
     this.properties = properties;
