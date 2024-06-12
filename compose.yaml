@@ -9,7 +9,7 @@ services:
     networks:
       - yrs-api-network
   postgres_yrs_api:
-    image: 'postgres:15'
+    image: 'postgres:15-alpine'
     volumes:
       - postgres-yrs-api:/var/lib/postgresql/data
     environment:
@@ -27,7 +27,7 @@ services:
     networks:
       - yrs-api-network
   postgres_keycloak:
-    image: 'postgres:15'
+    image: 'postgres:15-alpine'
     volumes:
       - postgres-keycloak:/var/lib/postgresql/data
     environment:
