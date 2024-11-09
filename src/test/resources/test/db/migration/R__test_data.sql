@@ -35,9 +35,35 @@ VALUES (1000000000, '42 Rose Street', 'Apt 4B', 'W1G', null, 'Paddington', null,
         '16541241-c451-49f0-bae8-937dbf4c5c59', 'Milano', '27d46902-f762-4428-9a34-65eccd28ab51',
         'Italy', '00000000-0000-0000-0000-000000000004');
 
+--test data for tenants
+
+INSERT INTO global.tenant (id, name, external_id)
+VALUES (10000000, 'Demo Tenant', '00000000-0000-0000-0000-000000000001');
+
+INSERT INTO global.tenant_user (id, tenant_id, account_id)
+VALUES (10000001, 10000000, '00000000-0000-0000-0000-000000000002');
+
+CREATE SCHEMA "00000000-0000-0000-0000-000000000001";
+
+SET search_path TO "00000000-0000-0000-0000-000000000001", global, yrs_geodata;
+
+CREATE TABLE property (
+    id SERIAL,
+    name character varying(256) NOT NULL,
+    address_id UUID,
+    year_of_build integer,
+    type character varying(256),
+    description text,
+    size_mq integer,
+    external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
+
+ALTER TABLE ONLY property
+    ADD CONSTRAINT property_pkey PRIMARY KEY (id);
+
 --test data for properties
-INSERT INTO yrs_api.property (id, name, description, external_id, address_id)
-VALUES (1000000, 'my flat', 'residential flat', '00000000-0000-0000-0000-000000000001', null),
-       (1000001, 'my house', null, '00000000-0000-0000-0000-000000000002', null),
+INSERT INTO property (id, name, description, external_id, address_id, year_of_build)
+VALUES (1000000, 'my flat', 'residential flat', '00000000-0000-0000-0000-000000000001', null, 1971),
+       (1000001, 'my house', null, '00000000-0000-0000-0000-000000000002', null, null),
        (1000002, 'penthouse', null, '00000000-0000-0000-0000-000000000003',
-        '00000000-0000-0000-0000-000000000004');
+        '00000000-0000-0000-0000-000000000004', 1980);

@@ -18,6 +18,14 @@
 -- #L%
 ---
 
+CREATE TABLE global.tenant (
+    id SERIAL,
+    name character varying(256) NOT NULL,
+    external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
 
-ALTER TABLE ONLY yrs_api.property
-    ADD CONSTRAINT property_pkey PRIMARY KEY (id);
+CREATE TABLE global.tenant_user (
+    id SERIAL,
+    tenant_id integer NOT NULL,
+    account_id UUID NOT NULL
+);

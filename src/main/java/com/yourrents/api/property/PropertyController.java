@@ -47,7 +47,6 @@ class PropertyController {
 
   private final PropertyRepository propertyRepository;
 
-
   PropertyController(PropertyRepository propertyRepository) {
     this.propertyRepository = propertyRepository;
   }

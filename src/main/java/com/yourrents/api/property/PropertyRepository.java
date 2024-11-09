@@ -21,10 +21,11 @@ package com.yourrents.api.property;
  */
 
 
-import static com.yourrents.api.jooq.tables.Property.PROPERTY;
+import static com.yourrents.api.jooq.tenant.tables.Property.PROPERTY;
 import static org.jooq.Records.mapping;
 
-import com.yourrents.api.jooq.tables.records.PropertyRecord;
+import com.yourrents.api.jooq.tenant.tables.records.PropertyRecord;
+import com.yourrents.api.tenant.JooqTenantService;
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
@@ -50,19 +51,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class PropertyRepository {
 
   private final AddressRepository addressRepository;
-  private final DSLContext dsl;
   private final JooqUtils jooqUtils;
+  private final JooqTenantService jst;
 
-  public PropertyRepository(AddressRepository addressRepository, DSLContext dsl,
-      JooqUtils jooqUtils) {
+  public PropertyRepository(AddressRepository addressRepository, JooqUtils jooqUtils,
+      JooqTenantService jst) {
     this.addressRepository = addressRepository;
-    this.dsl = dsl;
     this.jooqUtils = jooqUtils;
+    this.jst = jst;
   }
-
 
   @Transactional(readOnly = false)
   public Property add(Property property) {
+    DSLContext dsl = jst.getDslForTenant();
     UUID addressUuid = null;
     if (property.addressUuid() != null) {
       addressRepository.findByExternalId(property.addressUuid())
@@ -89,6 +90,7 @@ public class PropertyRepository {
 
   @Transactional(readOnly = false)
   public boolean delete(UUID uuid) {
+    DSLContext dsl = jst.getDslForTenant();
     Integer propertyId = dsl.select(PROPERTY.ID)
         .from(PROPERTY)
         .where(PROPERTY.EXTERNAL_ID.eq(uuid))
@@ -101,6 +103,7 @@ public class PropertyRepository {
 
   @Transactional(readOnly = false)
   public Property update(UUID uuid, Property property) {
+    DSLContext dsl = jst.getDslForTenant();
     PropertyRecord propertyRecord = dsl.selectFrom(PROPERTY)
         .where(PROPERTY.EXTERNAL_ID.eq(uuid))
         .fetchOptional().orElseThrow(
@@ -138,23 +141,26 @@ public class PropertyRepository {
   }
 
   public Optional<Property> findById(Integer id) {
-    return getSelectPropertySpec()
+    DSLContext dsl = jst.getDslForTenant();
+    return getSelectPropertySpec(dsl)
         .where(PROPERTY.ID.eq(id))
         .fetchOptional()
         .map(mapping(Property::new));
   }
 
   public Optional<Property> findByExternalId(UUID externalId) {
-    return getSelectPropertySpec()
+    DSLContext dsl = jst.getDslForTenant();
+    return getSelectPropertySpec(dsl)
         .where(PROPERTY.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(mapping(Property::new));
   }
 
   public Page<Property> find(Searchable filter, Pageable pageable) {
+    DSLContext dsl = jst.getDslForTenant();
     Select<?> result = jooqUtils.paginate(
         dsl,
-        jooqUtils.getQueryWithConditionsAndSorts(getSelectPropertySpec(),
+        jooqUtils.getQueryWithConditionsAndSorts(getSelectPropertySpec(dsl),
             filter, this::getSupportedSortField,
             pageable, this::getSupportedSortField),
         pageable.getPageSize(), pageable.getOffset());
@@ -173,8 +179,9 @@ public class PropertyRepository {
     return new PageImpl<>(countries, pageable, totalRows);
   }
 
-  private SelectJoinStep<Record7<UUID, String, String, String, Integer, Integer, UUID>> getSelectPropertySpec() {
-    return this.dsl.select(
+  private SelectJoinStep<Record7<UUID, String, String, String, Integer, Integer, UUID>> getSelectPropertySpec(DSLContext tenantDsl) {
+    return tenantDsl
+        .select(
             PROPERTY.EXTERNAL_ID.as("uuid"),
             PROPERTY.NAME.as("name"),
             PROPERTY.TYPE.as("type"),
@@ -192,4 +199,5 @@ public class PropertyRepository {
           "Unexpected value for filter/sort field: " + field);
     };
   }
+
 }

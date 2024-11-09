@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.0</version>
+		<version>3.3.5</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.your-rents.api</groupId>
@@ -152,6 +152,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>		
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
 			<scope>test</scope>
@@ -230,62 +235,103 @@
 				</executions>
 			</plugin>
 
-      <plugin>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
-        <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${plugins.testcontainers.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${plugins.postgresql.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <?m2e execute onConfiguration?>
-            <id>generate-jooq-sources</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <database>
-                <type>POSTGRES</type>
-                <containerImage>postgres:15-alpine</containerImage>
-              </database>
-              <flyway>
-                <createSchemas>true</createSchemas>
-                <schemas>
-                  yrs_api
-                </schemas>
-                <locations>
-                  filesystem:${project.basedir}/src/main/resources/yrs-api/db/migration
-                </locations>
-              </flyway>
-              <jooq>
-                <generator>
-                  <database>
-                    <name>org.jooq.meta.postgres.PostgresDatabase</name>
-                    <includes>.*</includes>
-                    <excludes>flyway_schema_history</excludes>
-                    <inputSchema>yrs_api</inputSchema>
-                  </database>
-                  <target>
-                    <packageName>com.yourrents.api.jooq</packageName>
-                    <directory>target/generated-sources/jooq</directory>
-                  </target>
-                </generator>
-              </jooq>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+			<plugin>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
+				<version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.testcontainers</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>${plugins.testcontainers.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>${plugins.postgresql.version}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>generate-jooq-sources-global</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<database>
+								<type>POSTGRES</type>
+								<containerImage>postgres:15-alpine</containerImage>
+							</database>
+							<flyway>
+								<createSchemas>true</createSchemas>
+								<schemas>
+									global
+								</schemas>
+								<locations>
+									filesystem:${project.basedir}/src/main/resources/db/migration/global
+								</locations>
+							</flyway>
+							<jooq>
+								<generator>
+									<database>
+										<name>org.jooq.meta.postgres.PostgresDatabase</name>
+										<includes>.*</includes>
+										<excludes>flyway_schema_history</excludes>
+										<inputSchema>global</inputSchema>
+									</database>
+									<target>
+										<packageName>com.yourrents.api.jooq.global</packageName>
+										<directory>target/generated-sources/jooq</directory>
+									</target>
+								</generator>
+							</jooq>
+						</configuration>
+					</execution>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>generate-jooq-sources-tenant</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<database>
+								<type>POSTGRES</type>
+								<containerImage>postgres:15-alpine</containerImage>
+							</database>
+							<flyway>
+								<createSchemas>true</createSchemas>
+								<schemas>
+									00000000-0000-0000-0000-000000000001
+								</schemas>
+								<locations>
+									filesystem:${project.basedir}/src/main/resources/db/migration/tenant
+								</locations>
+							</flyway>
+							<jooq>
+								<generator>
+									<generate>
+										<globalSchemaReferences>false</globalSchemaReferences>
+									</generate>
+									<database>
+										<name>org.jooq.meta.postgres.PostgresDatabase</name>
+										<includes>.*</includes>
+										<excludes>flyway_schema_history</excludes>
+										<inputSchema>00000000-0000-0000-0000-000000000001</inputSchema>
+										<outputSchema>tenant</outputSchema>
+									</database>
+									<target>
+										<packageName>com.yourrents.api.jooq.tenant</packageName>
+										<directory>target/generated-sources/jooq</directory>
+									</target>
+								</generator>
+							</jooq>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

@@ -28,12 +28,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.yourrents.api.TestYourRentsApiApplication;
+import com.yourrents.api.security.PrincipalAccessor;
 import com.yourrents.services.geodata.repository.AddressRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,6 +50,9 @@ class PropertyControllerTest {
   static final int NUM_PROPERTIES = 3;
 
   final static String PROPERTY_URL = "/properties";
+
+  static final String ACCOUNT_ID = "00000000-0000-0000-0000-000000000002";
+
   @Autowired
   MockMvc mvc;
   @Autowired
@@ -54,6 +61,14 @@ class PropertyControllerTest {
   AddressRepository addressRepository;
   @Value("${yrs-api.api.basepath}")
   String basePath;
+
+  @MockBean
+  private PrincipalAccessor principalAccessor;
+
+  @BeforeEach
+  void setUp() {
+    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_ID);
+  }
 
   @Test
   void findAll() throws Exception {
