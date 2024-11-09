@@ -21,6 +21,7 @@ package com.yourrents.api.security;
  */
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,47 +29,62 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.yourrents.api.tenant.TenantFilter;
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration {
 
-    private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
+        private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
 
-  private final String allowedOrigins;
+        private final String allowedOrigins;
 
-  SecurityConfiguration(TokenConverterProperties properties,
-      @Value("${yrs-api.cors.allowed-origins}") String allowedOrigins) {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
-                new JwtGrantedAuthoritiesConverter();
-        this.keycloakJwtTokenConverter =
-                new KeycloakJwtTokenConverter(jwtGrantedAuthoritiesConverter, properties);
-    this.allowedOrigins = allowedOrigins;
-    }
+        SecurityConfiguration(TokenConverterProperties properties,
+                        @Value("${yrs-api.cors.allowed-origins}") String allowedOrigins) {
+                JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
+                                new JwtGrantedAuthoritiesConverter();
+                this.keycloakJwtTokenConverter = new KeycloakJwtTokenConverter(
+                                jwtGrantedAuthoritiesConverter, properties);
+                this.allowedOrigins = allowedOrigins;
+        }
 
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/actuator/**").permitAll().requestMatchers("/api/**")
-                        .hasRole("USER").anyRequest().permitAll())
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtTokenConverter)))
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .build();
-    }
+        @Bean
+        public FilterRegistrationBean<TenantFilter> tenantFilterRegistration(TenantFilter filter) {
+                FilterRegistrationBean<TenantFilter> registration =
+                                new FilterRegistrationBean<>(filter);
+                registration.setEnabled(false);
+                return registration;
+        }
 
-    @Bean
-    WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins(allowedOrigins.split(","))
-                        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE");
-            }
-        };
-    }
+        @Bean
+        SecurityFilterChain securityFilterChain(HttpSecurity http, TenantFilter tenantFilter)
+                        throws Exception {
+                return http.csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                                                .requestMatchers("/actuator/**").permitAll()
+                                                .requestMatchers("/api/**").hasRole("USER")
+                                                .anyRequest().permitAll())
+                                .oauth2ResourceServer(oauth2 -> oauth2
+                                                .jwt(jwt -> jwt.jwtAuthenticationConverter(
+                                                                keycloakJwtTokenConverter)))
+                                .sessionManagement(session -> session.sessionCreationPolicy(
+                                                SessionCreationPolicy.IF_REQUIRED))
+                                .addFilterBefore(tenantFilter, AuthorizationFilter.class)
+                                .build();
+        }
+
+        @Bean
+        WebMvcConfigurer corsConfigurer() {
+                return new WebMvcConfigurer() {
+                        @Override
+                        public void addCorsMappings(CorsRegistry registry) {
+                                registry.addMapping("/**").allowedOrigins(allowedOrigins.split(","))
+                                                .allowedMethods("GET", "POST", "PUT", "PATCH",
+                                                                "DELETE");
+                        }
+                };
+        }
 }

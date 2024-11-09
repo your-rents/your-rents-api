@@ -18,13 +18,14 @@
 -- #L%
 ---
 
-CREATE TABLE yrs_api.property (
-    id SERIAL,
-    name character varying(256) NOT NULL,
-    address_id UUID,
-    year_of_build integer,
-    type character varying(256),
-    description text,
-    size_mq integer,
-    external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
-);
+
+ALTER TABLE ONLY global.tenant
+    ADD CONSTRAINT tenant_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY global.tenant_user
+    ADD CONSTRAINT tenant_user_pkey PRIMARY KEY (id);
+
+-- Add foreign key constraints
+
+ALTER TABLE ONLY global.tenant_user
+    ADD CONSTRAINT tenant_user_manager_id_fkey FOREIGN KEY (tenant_id) REFERENCES global.tenant(id);

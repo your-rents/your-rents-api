@@ -24,13 +24,17 @@ package com.yourrents.api.property;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.yourrents.api.TestYourRentsApiApplication;
+import com.yourrents.api.security.PrincipalAccessor;
 import com.yourrents.services.geodata.model.Address;
 import com.yourrents.services.geodata.repository.AddressRepository;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,12 +45,23 @@ class PropertyRepositoryCreateUpdateDeleteTest {
 
   static final int ADDRESS_ID = 1000000000;
   static final int PROPERTY_ID = 1000000;
+  static final UUID PROPERTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+  static final int PROPERTY_YEAR_OF_BUILD = 1971;
+  static final String ACCOUNT_ID = "00000000-0000-0000-0000-000000000002";
 
   @Autowired
   PropertyRepository propertyRepository;
 
   @Autowired
   AddressRepository addressRepository;
+
+  @MockBean
+  private PrincipalAccessor principalAccessor;
+
+  @BeforeEach
+  void setUp() {
+    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_ID);
+  }
 
   @Test
   void add() {
@@ -66,23 +81,21 @@ class PropertyRepositoryCreateUpdateDeleteTest {
 
   @Test
   void delete() {
-    Property property = propertyRepository.findById(PROPERTY_ID).orElseThrow();
-    boolean isDeleted = propertyRepository.delete(property.uuid());
+    boolean isDeleted = propertyRepository.delete(PROPERTY_UUID);
     assertThat(isDeleted).isTrue();
-    Optional<Property> optional = propertyRepository.findById(PROPERTY_ID);
+    Optional<Property> optional = propertyRepository.findByExternalId(PROPERTY_UUID);
     assertThat(optional.isEmpty()).isTrue();
   }
 
   @Test
   void update() {
-    Property property = propertyRepository.findById(PROPERTY_ID).orElseThrow();
     UUID addressUuid = addressRepository.findById(ADDRESS_ID).map(Address::uuid).orElseThrow();
     Property updateProperty = new Property(null, "house", "house", "small house", null, null,
         addressUuid);
-    Property result = propertyRepository.update(property.uuid(), updateProperty);
+    Property result = propertyRepository.update(PROPERTY_UUID, updateProperty);
     assertThat(result).isNotNull();
     assertThat(result.addressUuid()).isEqualTo(addressUuid);
-    assertThat(result.yearOfBuild()).isEqualTo(property.yearOfBuild());
+    assertThat(result.yearOfBuild()).isEqualTo(PROPERTY_YEAR_OF_BUILD);
     assertThat(result.name()).isEqualTo(updateProperty.name());
   }
 }
