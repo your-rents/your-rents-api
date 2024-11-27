@@ -27,4 +27,5 @@ public interface PrincipalAccessor {
     String getUsername();
     String getName();
     String getSubject();
+    boolean isValid();
 }

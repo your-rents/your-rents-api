@@ -41,9 +41,20 @@ public class JwtPrincipalAccessor implements PrincipalAccessor {
     public String getSubject() {
         return jwt().getClaimAsString("sub");
     }
- 
-    private Jwt jwt() {
-        return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    @Override
+    public boolean isValid() {
+        return getPrincipal() instanceof Jwt;
+        
     }
+    
+    private Jwt jwt() {
+        return (Jwt) getPrincipal();
+    }
+
+    private Object getPrincipal() {
+        return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 
 }
