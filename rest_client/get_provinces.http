@@ -1,0 +1,41 @@
+# @name login
+POST {{token_url}} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&scope={{scope}}&client_id={{client_id}}&username={{username}}&password={{password}}&client_secret={{client_secret}}
+
+###
+
+@auth = Bearer {{login.response.body.access_token}}
+
+# @name getAllProvinces
+GET {{base_url}}/geodata/provinces
+Authorization: {{auth}}
+
+###
+
+# @name getProvincesPage
+GET {{base_url}}/geodata/provinces
+    ?page=0
+    &size=20
+    &sort=name,ASC
+Authorization: {{auth}}
+
+###
+@provinceUUID = bd9abe7d-414d-4f12-9f65-99d27289aeb6
+
+# @name getProvinceByUUID
+GET {{base_url}}/geodata/provinces/{{provinceUUID}}
+Authorization: {{auth}}
+
+###
+
+# @name getAllRegions
+GET {{base_url}}/geodata/regions
+Authorization: {{auth}}
+
+###
+
+# @name getAllProperties
+GET {{base_url}}/properties
+Authorization: {{auth}}

@@ -1,0 +1,19 @@
+{
+    "rest-client.environmentVariables": {
+        "$shared": {
+            "client_secret": "ZEeQ3Zmhnm3NX6QPGlEpPOLB2OavM3GZ",
+            "username": "user",
+            "password": "user",
+            "scope": "openid profile email",
+            "client_id": "your-rents-api"
+        },
+        "development": {
+            "base_url": "http://localhost:8080/api/v1/yourrents",
+            "token_url": "http://localhost:18080/realms/your-rents/protocol/openid-connect/token"
+        },
+        "docker": {
+            "base_url": "http://localhost:8080/api/v1/yourrents",
+            "token_url": "http://keycloak.local:18080/realms/your-rents/protocol/openid-connect/token"
+        }
+    }
+}
