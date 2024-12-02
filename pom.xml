@@ -82,6 +82,8 @@
 		<plugins.testcontainers.version>1.20.4</plugins.testcontainers.version>
 		<plugins.postgresql.version>42.7.4</plugins.postgresql.version>
 		<your-rents-services-geodata.version>0.0.4</your-rents-services-geodata.version>
+		<building.db.username>your_rents</building.db.username>
+		<building.db.password>your_rents</building.db.password>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -155,7 +157,7 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
@@ -185,6 +187,27 @@
 					</compilerArgs>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
@@ -236,98 +259,146 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
-				<version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+				<version>2.1.1</version>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>start-db</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>
+								db = new org.testcontainers.containers.PostgreSQLContainer("postgres:15-alpine")
+									.withUsername("${building.db.username}")
+									.withDatabaseName("postgres")
+									.withPassword("${building.db.password}");
+								db.start();
+								project.properties.setProperty('building.db.url', db.getJdbcUrl());
+							</source>
+						</configuration>
+					</execution>
+				</executions>
 				<dependencies>
 					<dependency>
 						<groupId>org.testcontainers</groupId>
 						<artifactId>postgresql</artifactId>
 						<version>${plugins.testcontainers.version}</version>
 					</dependency>
-					<dependency>
-						<groupId>org.postgresql</groupId>
-						<artifactId>postgresql</artifactId>
-						<version>${plugins.postgresql.version}</version>
-					</dependency>
 				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<?m2e execute onConfiguration?>
-						<id>generate-jooq-sources-global</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
+						<id>db-migration-global</id>
 						<phase>generate-sources</phase>
+						<goals>
+							<goal>migrate</goal>
+						</goals>
 						<configuration>
-							<database>
-								<type>POSTGRES</type>
-								<containerImage>postgres:15-alpine</containerImage>
-							</database>
-							<flyway>
-								<createSchemas>true</createSchemas>
-								<schemas>
-									global
-								</schemas>
-								<locations>
+							<url>${building.db.url}</url>
+							<user>${building.db.username}</user>
+							<password>${building.db.password}</password>
+							<createSchemas>true</createSchemas>
+							<schemas>
+								global
+							</schemas>
+							<locations>
+								<location>
 									filesystem:${project.basedir}/src/main/resources/db/migration/global
-								</locations>
-							</flyway>
-							<jooq>
-								<generator>
-									<database>
-										<name>org.jooq.meta.postgres.PostgresDatabase</name>
-										<includes>.*</includes>
-										<excludes>flyway_schema_history</excludes>
-										<inputSchema>global</inputSchema>
-									</database>
-									<target>
-										<packageName>com.yourrents.api.jooq.global</packageName>
-										<directory>target/generated-sources/jooq</directory>
-									</target>
-								</generator>
-							</jooq>
+								</location>
+							</locations>
 						</configuration>
 					</execution>
 					<execution>
 						<?m2e execute onConfiguration?>
-						<id>generate-jooq-sources-tenant</id>
+						<id>db-migration-tenant</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>migrate</goal>
+						</goals>
+						<configuration>
+							<url>${building.db.url}</url>
+							<user>${building.db.username}</user>
+							<password>${building.db.password}</password>
+							<createSchemas>true</createSchemas>
+							<schemas>
+								00000000-0000-0000-0000-000000000001
+							</schemas>
+							<locations>
+								<location>
+									filesystem:${project.basedir}/src/main/resources/db/migration/tenant
+								</location>
+							</locations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq-codegen-maven</artifactId>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>java-generator-global</id>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
-						<phase>generate-sources</phase>
 						<configuration>
-							<database>
-								<type>POSTGRES</type>
-								<containerImage>postgres:15-alpine</containerImage>
-							</database>
-							<flyway>
-								<createSchemas>true</createSchemas>
-								<schemas>
-									00000000-0000-0000-0000-000000000001
-								</schemas>
-								<locations>
-									filesystem:${project.basedir}/src/main/resources/db/migration/tenant
-								</locations>
-							</flyway>
-							<jooq>
-								<generator>
-									<generate>
-										<globalSchemaReferences>false</globalSchemaReferences>
-									</generate>
-									<database>
-										<name>org.jooq.meta.postgres.PostgresDatabase</name>
-										<includes>.*</includes>
-										<excludes>flyway_schema_history</excludes>
-										<inputSchema>00000000-0000-0000-0000-000000000001</inputSchema>
-										<outputSchema>tenant</outputSchema>
-									</database>
-									<target>
-										<packageName>com.yourrents.api.jooq.tenant</packageName>
-										<directory>target/generated-sources/jooq</directory>
-									</target>
-								</generator>
-							</jooq>
+							<jdbc>
+								<url>${building.db.url}</url>
+								<user>${building.db.username}</user>
+								<password>${building.db.password}</password>
+							</jdbc>
+							<generator>
+								<database>
+									<name>org.jooq.meta.postgres.PostgresDatabase</name>
+									<includes>.*</includes>
+									<excludes>flyway_schema_history</excludes>
+									<inputSchema>global</inputSchema>
+								</database>
+								<target>
+									<packageName>com.yourrents.api.jooq.global</packageName>
+									<directory>target/generated-sources/jooq</directory>
+								</target>
+							</generator>
+						</configuration>
+					</execution>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>java-generator-tenant</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<jdbc>
+								<url>${building.db.url}</url>
+								<user>${building.db.username}</user>
+								<password>${building.db.password}</password>
+							</jdbc>
+							<generator>
+								<database>
+									<name>org.jooq.meta.postgres.PostgresDatabase</name>
+									<includes>.*</includes>
+									<excludes>flyway_schema_history</excludes>
+									<inputSchema>00000000-0000-0000-0000-000000000001</inputSchema>
+									<outputSchema>tenant</outputSchema>
+								</database>
+								<target>
+									<packageName>com.yourrents.api.jooq.tenant</packageName>
+									<directory>target/generated-sources/jooq</directory>
+								</target>
+							</generator>
 						</configuration>
 					</execution>
 				</executions>
