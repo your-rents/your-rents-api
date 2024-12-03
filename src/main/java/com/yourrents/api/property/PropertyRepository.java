@@ -21,8 +21,11 @@ package com.yourrents.api.property;
  */
 
 
+import static com.yourrents.api.jooq.global.Tables.PROPERTY_TYPE;
 import static com.yourrents.api.jooq.tenant.tables.Property.PROPERTY;
+import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.Records.mapping;
+import static org.jooq.impl.DSL.row;
 
 import com.yourrents.api.jooq.tenant.tables.records.PropertyRecord;
 import com.yourrents.api.tenant.JooqTenantService;
@@ -61,6 +64,7 @@ public class PropertyRepository {
     this.jst = jst;
   }
 
+
   @Transactional(readOnly = false)
   public Property add(Property property) {
     DSLContext dsl = jst.getDslForTenant();
@@ -71,9 +75,15 @@ public class PropertyRepository {
               "cannot find address with uuid: " + property.addressUuid()));
       addressUuid = property.addressUuid();
     }
+    Integer propertyTypeId = null;
+    if (property.type() != null && property.type().uuid() != null) {
+      propertyTypeId = findPropertyTypeId(property.type().uuid(), dsl);
+    }
     PropertyRecord newProperty = dsl.newRecord(PROPERTY);
+    if (propertyTypeId != null) {
+      newProperty.setTypeId(propertyTypeId);
+    }
     newProperty.setName(property.name());
-    newProperty.setType(property.type());
     newProperty.setDescription(property.description());
     if (property.yearOfBuild() != null && property.yearOfBuild() < 0) {
       throw new IllegalArgumentException("yearOfBuild must be a positive integer");
@@ -95,7 +105,7 @@ public class PropertyRepository {
         .from(PROPERTY)
         .where(PROPERTY.EXTERNAL_ID.eq(uuid))
         .fetchOptional(PROPERTY.ID).orElseThrow(
-            () -> new DataNotFoundException("Property not found: " + uuid));
+            () -> new DataNotFoundException("cannot find property with uuid: " + uuid));
     return dsl.deleteFrom(PROPERTY)
         .where(PROPERTY.ID.eq(propertyId))
         .execute() > 0;
@@ -110,15 +120,17 @@ public class PropertyRepository {
             () -> new DataNotFoundException("Record not found: " + uuid));
     if (property.addressUuid() != null) {
       addressRepository.findByExternalId(property.addressUuid())
-          .orElseThrow(() -> new IllegalArgumentException(
+          .orElseThrow(() -> new DataNotFoundException(
               "cannot find address with uuid: " + property.addressUuid()));
       propertyRecord.setAddressId(property.addressUuid());
     }
+
+    if (property.type() != null && property.type().uuid() != null) {
+      final Integer propertyTypeId = findPropertyTypeId(property.type().uuid(), dsl);
+      propertyRecord.setTypeId(propertyTypeId);
+    }
     if (property.name() != null) {
       propertyRecord.setName(property.name());
-    }
-    if (property.type() != null) {
-      propertyRecord.setType(property.type());
     }
     if (property.description() != null) {
       propertyRecord.setDescription(property.description());
@@ -164,11 +176,11 @@ public class PropertyRepository {
             filter, this::getSupportedSortField,
             pageable, this::getSupportedSortField),
         pageable.getPageSize(), pageable.getOffset());
-    List<Property> countries = result.fetch(r ->
+    List<Property> properties = result.fetch(r ->
         new Property(
             r.get("uuid", UUID.class),
             r.get("name", String.class),
-            r.get("type", String.class),
+            r.get("type", PropertyType.class),
             r.get("description", String.class),
             r.get("yearOfBuild", Integer.class),
             r.get("sizeMq", Integer.class),
@@ -176,20 +188,33 @@ public class PropertyRepository {
     );
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
-    return new PageImpl<>(countries, pageable, totalRows);
+    return new PageImpl<>(properties, pageable, totalRows);
   }
 
-  private SelectJoinStep<Record7<UUID, String, String, String, Integer, Integer, UUID>> getSelectPropertySpec(DSLContext tenantDsl) {
+  private Integer findPropertyTypeId(UUID propertyTypeUuid, DSLContext dsl) {
+    return dsl.select(PROPERTY_TYPE.ID)
+        .from(PROPERTY_TYPE)
+        .where(PROPERTY_TYPE.EXTERNAL_ID.eq(propertyTypeUuid))
+        .fetchOptional(PROPERTY_TYPE.ID).orElseThrow(
+            () -> new DataNotFoundException(
+                "cannot find property_type with uuid: " + propertyTypeUuid));
+  }
+
+  private SelectJoinStep<Record7<UUID, String, PropertyType, String, Integer, Integer, UUID>> getSelectPropertySpec(
+      DSLContext tenantDsl) {
     return tenantDsl
         .select(
             PROPERTY.EXTERNAL_ID.as("uuid"),
             PROPERTY.NAME.as("name"),
-            PROPERTY.TYPE.as("type"),
+            row(PROPERTY_TYPE.EXTERNAL_ID, PROPERTY_TYPE.NAME, PROPERTY_TYPE.CODE,
+                PROPERTY_TYPE.DESCRIPTION)
+                .mapping(nullOnAllNull(PropertyType::new)).as("type"),
             PROPERTY.DESCRIPTION.as("description"),
             PROPERTY.YEAR_OF_BUILD.as("yearOfBuild"),
             PROPERTY.SIZE_MQ.as("sizeMq"),
             PROPERTY.ADDRESS_ID.as("addressUuid"))
-        .from(PROPERTY);
+        .from(PROPERTY)
+        .leftJoin(PROPERTY_TYPE).on(PROPERTY_TYPE.ID.eq(PROPERTY.TYPE_ID));
   }
 
   private Field<?> getSupportedSortField(String field) {

@@ -54,8 +54,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PropertyControllerCreateUpdateDeleteTest {
 
+  static final String PROPERTY_TYPE_UUID = "00000000-0000-0000-0000-000000000001";
 
-  final static String PROPERTY_URL = "/properties";
+  static final String ADDRESS_UUID = "00000000-0000-0000-0000-000000000001";
+
+  static final String PROPERTY_URL = "/properties";
 
   static final String ACCOUNT_ID = "00000000-0000-0000-0000-000000000002";
 
@@ -83,16 +86,17 @@ class PropertyControllerCreateUpdateDeleteTest {
             .content("""
                 {
                    "name": "My House in London",
-                   "type": "residential flat",
+                   "type": {"uuid":  "%s"},
                    "description": "vacation real estate",
                    "yearOfBuild": 2015,
                    "sizeMq": 90,
-                   "addressUuid": "00000000-0000-0000-0000-000000000001"
+                   "addressUuid": "%s"
                 }
-                """))
+                """.formatted(PROPERTY_TYPE_UUID, ADDRESS_UUID)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.name", is("My House in London")))
         .andExpect(jsonPath("$.uuid").isNotEmpty())
+        .andExpect(jsonPath("$.type.uuid", is(PROPERTY_TYPE_UUID)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 

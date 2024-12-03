@@ -20,6 +20,7 @@ package com.yourrents.api.property;
  * #L%
  */
 
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.yourrents.api.TestYourRentsApiApplication;
 import com.yourrents.api.security.PrincipalAccessor;
-import com.yourrents.services.geodata.repository.AddressRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -49,16 +50,18 @@ class PropertyControllerTest {
 
   static final int NUM_PROPERTIES = 3;
 
-  final static String PROPERTY_URL = "/properties";
+  static final String PROPERTY_URL = "/properties";
 
-  static final String ACCOUNT_ID = "00000000-0000-0000-0000-000000000002";
+  static final String ACCOUNT_UUID = "00000000-0000-0000-0000-000000000002";
+
+  static final String PROPERTY_TYPE_UUID = "00000000-0000-0000-0000-000000000001";
+
+  static final String FIRST_PROPERTY_UUID = "00000000-0000-0000-0000-000000000001";
+
 
   @Autowired
   MockMvc mvc;
-  @Autowired
-  PropertyRepository propertyRepository;
-  @Autowired
-  AddressRepository addressRepository;
+
   @Value("${yrs-api.api.basepath}")
   String basePath;
 
@@ -67,7 +70,7 @@ class PropertyControllerTest {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_ID);
+    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_UUID);
   }
 
   @Test
@@ -80,7 +83,18 @@ class PropertyControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
         .andExpect(jsonPath("$.content", hasSize(NUM_PROPERTIES)))
+
         .andExpect(jsonPath("$.content[0].name", is("my flat")))
+        .andExpect(jsonPath("$.content[0].description", is("residential flat")))
+        .andExpect(jsonPath("$.content[0].uuid", is(FIRST_PROPERTY_UUID)))
+        .andExpect(jsonPath("$.content[0].yearOfBuild", is(1971)))
+        .andExpect(jsonPath("$.content[0].sizeMq", is(100)))
+        .andExpect(jsonPath("$.content[0].addressUuid", is(emptyOrNullString())))
+        .andExpect(jsonPath("$.content[0].type.uuid", is(PROPERTY_TYPE_UUID)))
+        .andExpect(jsonPath("$.content[0].type.name", is("test type")))
+        .andExpect(jsonPath("$.content[0].type.code", is("TTY")))
+        .andExpect(jsonPath("$.content[0].type.description", is("just a type for test")))
+
         .andExpect(jsonPath("$.content[1].name", is("my house")))
         .andExpect(jsonPath("$.content[2].name", is("penthouse")))
         .andExpect(jsonPath("$.page.totalPages", is(1)))
@@ -98,6 +112,15 @@ class PropertyControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.name", is("my flat")));
+  }
+
+  @Test
+  void findByANotExistingUuid() throws Exception {
+    String uUID = UUID.randomUUID().toString();
+    mvc.perform(get(basePath + PROPERTY_URL + "/" + uUID).contentType(
+            MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
   @Test

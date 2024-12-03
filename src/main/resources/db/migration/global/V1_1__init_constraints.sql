@@ -25,6 +25,9 @@ ALTER TABLE ONLY global.tenant
 ALTER TABLE ONLY global.tenant_user
     ADD CONSTRAINT tenant_user_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY global.property_type
+  ADD CONSTRAINT property_type_pkey PRIMARY KEY (id);
+
 -- Add foreign key constraints
 
 ALTER TABLE ONLY global.tenant_user

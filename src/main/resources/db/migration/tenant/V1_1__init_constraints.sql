@@ -18,6 +18,10 @@
 -- #L%
 ---
 
-
+-- Add primary key constraints
 ALTER TABLE ONLY property
     ADD CONSTRAINT property_pkey PRIMARY KEY (id);
+
+-- Add foreign key constraints
+ALTER TABLE ONLY property
+  ADD CONSTRAINT property_property_type_id_fkey FOREIGN KEY (type_id) REFERENCES global.property_type(id);

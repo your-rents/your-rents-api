@@ -23,7 +23,7 @@ CREATE TABLE property (
     name character varying(256) NOT NULL,
     address_id UUID,
     year_of_build integer,
-    type character varying(256),
+    type_id integer,
     description text,
     size_mq integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
