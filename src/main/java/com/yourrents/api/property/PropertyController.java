@@ -51,6 +51,7 @@ class PropertyController {
     this.propertyRepository = propertyRepository;
   }
 
+
   @GetMapping
   ResponseEntity<Page<Property>> find(
       @ParameterObject Searchable filter,
@@ -58,6 +59,7 @@ class PropertyController {
     Page<Property> page = propertyRepository.find(filter, pagination);
     return ResponseEntity.ok(page);
   }
+
 
   @GetMapping("/{uuid}")
   ResponseEntity<Property> findByUuid(@PathVariable UUID uuid) {

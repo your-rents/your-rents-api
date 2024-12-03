@@ -29,3 +29,11 @@ CREATE TABLE global.tenant_user (
     tenant_id integer NOT NULL,
     account_id UUID NOT NULL
 );
+
+CREATE TABLE global.property_type (
+    id SERIAL,
+    name character varying(256) NOT NULL,
+    code character varying(256) NOT NULL,
+    description text,
+    external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);

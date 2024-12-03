@@ -22,7 +22,6 @@ package com.yourrents.api.property;
 
 import java.util.UUID;
 
-public record Property(UUID uuid, String name, PropertyType type, String description,
-                       Integer yearOfBuild, Integer sizeMq, UUID addressUuid) {
+record PropertyType(UUID uuid, String name, String code, String description) {
 
 }

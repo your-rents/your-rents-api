@@ -50,7 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PropertyRepositoryTest {
 
-  static final String ACCOUNT_ID = "00000000-0000-0000-0000-000000000002";
+  static final String ACCOUNT_UUID = "00000000-0000-0000-0000-000000000002";
 
   @Autowired
   PropertyRepository propertyRepository;
@@ -63,7 +63,7 @@ class PropertyRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_ID);
+    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_UUID);
   }
 
   @Test
