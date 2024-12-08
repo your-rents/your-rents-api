@@ -23,56 +23,24 @@ package com.yourrents.api.property;
 import static com.yourrents.api.jooq.global.Tables.PROPERTY_TYPE;
 import static org.jooq.Records.mapping;
 
-import java.util.List;
-import java.util.Optional;
+import com.yourrents.api.common.GenericJooqRepository;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Record4;
+import org.jooq.RecordMapper;
 import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Transactional(readOnly = true)
-class PropertyTypeRepository {
+class PropertyTypeRepository extends
+    GenericJooqRepository<PropertyType, Record4<UUID, String, String, String>> {
 
-  private final DSLContext dsl;
-
-  PropertyTypeRepository(DSLContext dsl) {
-    this.dsl = dsl;
+  public PropertyTypeRepository(DSLContext dsl) {
+    super(dsl);
   }
 
-  /**
-   * Return, if present, the property_type record identified by id
-   */
-  Optional<PropertyType> findById(Integer id) {
-    return selectJoinStep()
-        .where(PROPERTY_TYPE.ID.eq(id))
-        .fetchOptional()
-        .map(mapping(PropertyType::new));
-  }
-
-  /**
-   * Return, if present, the property_type record identified by externalId
-   */
-  Optional<PropertyType> findByExternalId(UUID externalId) {
-    return selectJoinStep()
-        .where(PROPERTY_TYPE.EXTERNAL_ID.eq(externalId))
-        .fetchOptional()
-        .map(mapping(PropertyType::new));
-  }
-
-  /**
-   * Return all the property_type records sorted by id asc.
-   */
-  List<PropertyType> findAll() {
-    return selectJoinStep()
-        .orderBy(PROPERTY_TYPE.ID.asc()) // Apply sorting here
-        .fetch()
-        .map(mapping(PropertyType::new));
-  }
-
-  private SelectJoinStep<Record4<UUID, String, String, String>> selectJoinStep() {
+  @Override
+  public final SelectJoinStep<Record4<UUID, String, String, String>> selectJoinStep() {
     return dsl
         .select(
             PROPERTY_TYPE.EXTERNAL_ID.as("uuid"),
@@ -81,5 +49,15 @@ class PropertyTypeRepository {
             PROPERTY_TYPE.DESCRIPTION.as("description")
         )
         .from(PROPERTY_TYPE);
+  }
+
+  @Override
+  public final RecordMapper<Record4<UUID, String, String, String>, PropertyType> mapper() {
+    return mapping(PropertyType::new);
+  }
+
+  @Override
+  public final com.yourrents.api.jooq.global.tables.PropertyType getTable() {
+    return PROPERTY_TYPE;
   }
 }
