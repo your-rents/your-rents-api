@@ -67,13 +67,13 @@ public abstract class GenericJooqRepository<T extends java.lang.Record, R extend
 
   @Transactional(readOnly = false)
   public boolean delete(UUID uuid) {
-    Integer propertyId = dsl.select(getIdField())
+    Integer id = dsl.select(getIdField())
         .from(getTable())
         .where(getExternalIdField().eq(uuid))
         .fetchOptional(getIdField()).orElseThrow(
             () -> new DataNotFoundException("cannot find record with uuid: " + uuid));
     return dsl.deleteFrom(getTable())
-        .where(getIdField().eq(propertyId))
+        .where(getIdField().eq(id))
         .execute() > 0;
   }
 
