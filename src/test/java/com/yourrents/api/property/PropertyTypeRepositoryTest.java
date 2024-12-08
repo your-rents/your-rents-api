@@ -64,4 +64,10 @@ class PropertyTypeRepositoryTest {
     assertThat(propertyTypeList.getFirst().code()).isEqualTo("APT");
     assertThat(propertyTypeList.getLast().code()).isEqualTo("TTY");
   }
+
+  @Test
+  void delete() {
+    boolean delete = propertyTypeRepository.delete(PROPERTY_TYPE_UUID);
+    assertThat(delete).isTrue();
+  }
 }
