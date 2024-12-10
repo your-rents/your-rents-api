@@ -23,6 +23,7 @@ package com.yourrents.api.property;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("${yrs-api.api.basepath}/properties")
+@Validated
 class PropertyController {
 
   private final PropertyRepository propertyRepository;
@@ -70,13 +73,13 @@ class PropertyController {
   }
 
   @PostMapping
-  ResponseEntity<Property> add(@RequestBody Property property) {
+  ResponseEntity<Property> add(@Valid @RequestBody Property property) {
     Property savedProperty = propertyRepository.add(property);
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
-  ResponseEntity<Property> update(@PathVariable UUID uuid, @RequestBody Property propertyToUpdate) {
+  ResponseEntity<Property> update(@PathVariable UUID uuid,@Valid @RequestBody Property propertyToUpdate) {
     Property updatedProperty = propertyRepository.update(uuid, propertyToUpdate);
     return ResponseEntity.ok(updatedProperty);
   }

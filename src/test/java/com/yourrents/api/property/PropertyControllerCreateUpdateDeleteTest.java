@@ -60,7 +60,8 @@ class PropertyControllerCreateUpdateDeleteTest {
 
   static final String PROPERTY_URL = "/properties";
 
-  static final String ACCOUNT_ID = "00000000-0000-0000-0000-000000000002";
+  static final String ACCOUNT_UUID = "00000000-0000-0000-0000-000000000002";
+  static final String PROPERTY_UUID = "00000000-0000-0000-0000-000000000001";
 
   @Autowired
   MockMvc mvc;
@@ -76,7 +77,7 @@ class PropertyControllerCreateUpdateDeleteTest {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_ID);
+    Mockito.when(principalAccessor.getSubject()).thenReturn(ACCOUNT_UUID);
   }
 
   @Test
@@ -101,6 +102,38 @@ class PropertyControllerCreateUpdateDeleteTest {
   }
 
   @Test
+  void createNewPropertyWithInvalidDescription() throws Exception {
+    mvc.perform(post(basePath + PROPERTY_URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   "name": "My House in London",
+                   "type": {"uuid":  "%s"},
+                   "description": "a",
+                   "yearOfBuild": "100",
+                   "sizeMq": "90",
+                   "addressUuid": "%s"
+                }
+                """.formatted(PROPERTY_TYPE_UUID, ADDRESS_UUID)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+  }
+
+  @Test
+  void createNewPropertyWithNullName() throws Exception {
+    UUID randomUUID = UUID.randomUUID();
+    mvc.perform(post(basePath + PROPERTY_URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   "addressUuid": "%s"
+                }
+                """.formatted(randomUUID)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+  @Test
   void createNewPropertyWIthInvalidAddress() throws Exception {
     UUID randomUUID = UUID.randomUUID();
     mvc.perform(post(basePath + PROPERTY_URL)
@@ -117,33 +150,43 @@ class PropertyControllerCreateUpdateDeleteTest {
 
   @Test
   void updateAnExistingProperty() throws Exception {
-    UUID addressUuid = addressRepository.findById(1000000000).map(Address::uuid).orElseThrow();
-    Property property = propertyRepository.findById(1000000).orElseThrow();
-    assertThat(property.addressUuid(), nullValue());
-    mvc.perform(patch(basePath + PROPERTY_URL + "/" + property.uuid())
+    mvc.perform(patch(basePath + PROPERTY_URL + "/" + PROPERTY_UUID)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
                    "name": "updated property",
                    "addressUuid": "%s"
                 }
-                """.formatted(addressUuid)))
+                """.formatted(ADDRESS_UUID)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name", is("updated property")))
-        .andExpect(jsonPath("$.addressUuid", is(addressUuid.toString())))
+        .andExpect(jsonPath("$.addressUuid", is(ADDRESS_UUID)))
         .andExpect(jsonPath("$.description", is("residential flat")));
   }
 
   @Test
-  void updateAPropertyWIthAnInvalidAddress() throws Exception {
+  void updateAnExistingPropertyWIthAnInvalidAddress() throws Exception {
     UUID randomUUID = UUID.randomUUID();
-    mvc.perform(patch(basePath + PROPERTY_URL + "/" + randomUUID)
+    mvc.perform(patch(basePath + PROPERTY_URL + "/" + PROPERTY_UUID)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
                   "addressUuid": "%s"
                 }
                 """.formatted(randomUUID)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+  @Test
+  void updateAnExistingPropertyWIthAnInvalidYear() throws Exception {
+    mvc.perform(patch(basePath + PROPERTY_URL + "/" + PROPERTY_UUID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "yearOfBuild": "100"
+                }
+                """))
         .andExpect(status().is4xxClientError())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }

@@ -36,10 +36,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Import(TestYourRentsApiApplication.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Transactional
 class PropertyTypeControllerTest {
 
   static final int NUM_PROPERTY_TYPES = 10;
