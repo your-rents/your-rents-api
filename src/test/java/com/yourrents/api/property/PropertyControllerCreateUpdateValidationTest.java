@@ -20,9 +20,7 @@ package com.yourrents.api.property;
  * #L%
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -50,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(TestYourRentsApiApplication.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class PropertyControllerCreateUpdateDeleteTest {
+class PropertyControllerCreateUpdateValidationTest {
 
   static final String PROPERTY_TYPE_UUID = "00000000-0000-0000-0000-000000000001";
 
@@ -59,7 +57,6 @@ class PropertyControllerCreateUpdateDeleteTest {
   static final String ACCOUNT_UUID = "00000000-0000-0000-0000-000000000002";
 
   static final String PROPERTY_URL = "/properties";
-
 
   @Autowired
   MockMvc mvc;
@@ -79,89 +76,74 @@ class PropertyControllerCreateUpdateDeleteTest {
   }
 
   @Test
-  void createNewProperty() throws Exception {
+  void createNewPropertyWithNullName() throws Exception {
     mvc.perform(post(basePath + PROPERTY_URL)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                   "name": "My House in London",
-                   "type": {"uuid":  "%s"},
-                   "description": "vacation real estate",
-                   "yearOfBuild": 2015,
-                   "sizeMq": 90,
-                   "addressUuid": "%s"
+                  "type": {
+                    "uuid": "%s"
+                  }
                 }
-                """.formatted(PROPERTY_TYPE_UUID, ADDRESS_UUID)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.name", is("My House in London")))
-        .andExpect(jsonPath("$.uuid").isNotEmpty())
-        .andExpect(jsonPath("$.type.uuid", is(PROPERTY_TYPE_UUID)))
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-  }
-
-  @Test
-  void createNewPropertyWIthInvalidAddress() throws Exception {
-    UUID randomUUID = UUID.randomUUID();
-    mvc.perform(post(basePath + PROPERTY_URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                   "name": "fake property",
-                   "addressUuid": "%s"
-                }
-                """.formatted(randomUUID)))
+                """.formatted(PROPERTY_TYPE_UUID)
+            ))
         .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.name", is(Property.NAME_NOT_NULL_CONSTRAINT)))
+        // .andDo(print())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+
+  @Test
+  void createNewPropertyWithInvalidNameAndInvalidDescription() throws Exception {
+    mvc.perform(post(basePath + PROPERTY_URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                "name" : "my",
+                "description" : "ds"
+                }
+                 """
+            ))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.name", is(Property.NAME_CONSTRAINT)))
+        .andExpect(jsonPath("$.description", is(Property.DESCRIPTION_CONSTRAINT)))
+        //.andDo(print())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
   @Test
-  void updateAnExistingProperty() throws Exception {
+  void updateAnExistingPropertyWithAnInvalidYearOfBuild() throws Exception {
     UUID propertyUuid = propertyRepository.findById(1000000).map(Property::uuid).orElseThrow();
     mvc.perform(patch(basePath + PROPERTY_URL + "/" + propertyUuid)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                   "name": "updated property",
-                   "addressUuid": "%s"
+                   "yearOfBuild": 999
                 }
-                """.formatted(ADDRESS_UUID)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.name", is("updated property")))
-        .andExpect(jsonPath("$.addressUuid", is(ADDRESS_UUID.toString())))
-        .andExpect(jsonPath("$.description", is("residential flat")));
-  }
-
-  @Test
-  void updateAPropertyWIthAnInvalidAddress() throws Exception {
-    UUID propertyUuid = propertyRepository.findById(1000000).map(Property::uuid).orElseThrow();
-    UUID randomUUID = UUID.randomUUID();
-    mvc.perform(patch(basePath + PROPERTY_URL + "/" + propertyUuid)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "addressUuid": "%s"
-                }
-                """.formatted(randomUUID)))
+                """))
         .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.yearOfBuild", is(Property.YOB_MIN_CONSTRAINT)))
+        //.andDo(print())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
   @Test
-  void deleteAnExistingProperty() throws Exception {
+  void updateAnExistingPropertyWithAnInvalidSizeMq() throws Exception {
     UUID propertyUuid = propertyRepository.findById(1000000).map(Property::uuid).orElseThrow();
-    mvc.perform(delete(basePath + PROPERTY_URL + "/" + propertyUuid).contentType(
-            MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-    assertThat(propertyRepository.findById(1000000).isPresent(), is(false));
+    mvc.perform(patch(basePath + PROPERTY_URL + "/" + propertyUuid)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   "sizeMq": -10
+                }
+                """))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.sizeMq", is(Property.SIZE_MQ_CONSTRAINT)))
+        //.andDo(print())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
-  @Test
-  void deleteANotExistingProperty() throws Exception {
-    UUID randomUUID = UUID.randomUUID();
-    mvc.perform(
-            delete(basePath + PROPERTY_URL + "/" + randomUUID).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
-  }
 
 }
 

@@ -71,13 +71,16 @@ public class PropertyRepository {
     UUID addressUuid = null;
     if (property.addressUuid() != null) {
       addressRepository.findByExternalId(property.addressUuid())
-          .orElseThrow(() -> new IllegalArgumentException(
+          .orElseThrow(() -> new DataNotFoundException(
               "cannot find address with uuid: " + property.addressUuid()));
       addressUuid = property.addressUuid();
     }
     Integer propertyTypeId = null;
     if (property.type() != null && property.type().uuid() != null) {
       propertyTypeId = findPropertyTypeId(property.type().uuid(), dsl);
+    }
+    if(property.name()==null) {
+      throw new IllegalArgumentException("name is mandatory");
     }
     PropertyRecord newProperty = dsl.newRecord(PROPERTY);
     if (propertyTypeId != null) {

@@ -21,6 +21,7 @@ package com.yourrents.api.property;
  */
 
 
+import com.yourrents.api.exception.ValidationGroups;
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.UUID;
@@ -31,6 +32,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -70,13 +72,14 @@ class PropertyController {
   }
 
   @PostMapping
-  ResponseEntity<Property> add(@RequestBody Property property) {
+  ResponseEntity<Property> add(@Validated(ValidationGroups.Post.class)  @RequestBody Property property) {
     Property savedProperty = propertyRepository.add(property);
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
-  ResponseEntity<Property> update(@PathVariable UUID uuid, @RequestBody Property propertyToUpdate) {
+  ResponseEntity<Property> update(@PathVariable UUID uuid,
+      @Validated(ValidationGroups.Patch.class) @RequestBody Property propertyToUpdate) {
     Property updatedProperty = propertyRepository.update(uuid, propertyToUpdate);
     return ResponseEntity.ok(updatedProperty);
   }

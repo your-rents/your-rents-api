@@ -28,8 +28,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan(basePackages = {"com.yourrents.services.geodata.controller",
     "com.yourrents.services.geodata.repository",
-    "com.yourrents.services.geodata.mapper",
-    "com.yourrents.services.common.util.exception"})
+    "com.yourrents.services.geodata.mapper"})
 public class YourRentsServiceGeodataConfiguration {
 
   @Bean
