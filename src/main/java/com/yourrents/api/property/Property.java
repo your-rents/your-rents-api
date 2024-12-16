@@ -53,7 +53,7 @@ public record Property(UUID uuid,
 
                        UUID addressUuid) {
 
-  static final String NAME_NOT_NULL_CONSTRAINT = "must not be null";
+  static final String NAME_NOT_NULL_CONSTRAINT = "name must not be null";
   static final String NAME_CONSTRAINT = "name must be between 3 and 50 characters";
   static final String DESCRIPTION_CONSTRAINT = "description must be between 5 and 50 characters";
   static final String YOB_MIN_CONSTRAINT = "Year of build must not be earlier than 1000";

@@ -79,9 +79,6 @@ public class PropertyRepository {
     if (property.type() != null && property.type().uuid() != null) {
       propertyTypeId = findPropertyTypeId(property.type().uuid(), dsl);
     }
-    if(property.name()==null) {
-      throw new IllegalArgumentException("name is mandatory");
-    }
     PropertyRecord newProperty = dsl.newRecord(PROPERTY);
     if (propertyTypeId != null) {
       newProperty.setTypeId(propertyTypeId);
