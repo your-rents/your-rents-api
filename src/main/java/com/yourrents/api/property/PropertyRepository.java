@@ -71,7 +71,7 @@ public class PropertyRepository {
     UUID addressUuid = null;
     if (property.addressUuid() != null) {
       addressRepository.findByExternalId(property.addressUuid())
-          .orElseThrow(() -> new IllegalArgumentException(
+          .orElseThrow(() -> new DataNotFoundException(
               "cannot find address with uuid: " + property.addressUuid()));
       addressUuid = property.addressUuid();
     }
