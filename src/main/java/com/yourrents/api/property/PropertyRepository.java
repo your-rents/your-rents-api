@@ -21,7 +21,7 @@ package com.yourrents.api.property;
  */
 
 
-import static com.yourrents.api.jooq.global.Tables.PROPERTY_TYPE;
+
 import static com.yourrents.api.jooq.tenant.tables.Property.PROPERTY;
 import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.Records.mapping;
@@ -83,6 +83,7 @@ public class PropertyRepository {
     if (propertyTypeId != null) {
       newProperty.setTypeId(propertyTypeId);
     }
+    newProperty.set
     newProperty.setName(property.name());
     newProperty.setDescription(property.description());
     if (property.yearOfBuild() != null && property.yearOfBuild() < 0) {

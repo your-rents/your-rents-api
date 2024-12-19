@@ -18,12 +18,14 @@
 -- #L%
 ---
 
+
+
 CREATE TABLE property (
     id SERIAL,
     name character varying(256) NOT NULL,
     address_id UUID,
     year_of_build integer,
-    type_id integer,
+    type global.property_type,
     description text,
     size_mq integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
