@@ -54,7 +54,6 @@ class PropertyControllerTest {
 
   static final String ACCOUNT_UUID = "00000000-0000-0000-0000-000000000002";
 
-  static final String PROPERTY_TYPE_UUID = "00000000-0000-0000-0000-000000000001";
 
   static final String FIRST_PROPERTY_UUID = "00000000-0000-0000-0000-000000000001";
 
@@ -90,10 +89,7 @@ class PropertyControllerTest {
         .andExpect(jsonPath("$.content[0].yearOfBuild", is(1971)))
         .andExpect(jsonPath("$.content[0].sizeMq", is(100)))
         .andExpect(jsonPath("$.content[0].addressUuid", is(emptyOrNullString())))
-        .andExpect(jsonPath("$.content[0].type.uuid", is(PROPERTY_TYPE_UUID)))
-        .andExpect(jsonPath("$.content[0].type.name", is("test type")))
-        .andExpect(jsonPath("$.content[0].type.code", is("TTY")))
-        .andExpect(jsonPath("$.content[0].type.description", is("just a type for test")))
+        .andExpect(jsonPath("$.content[0].type", is(PropertyType.APARTMENT.name())))
 
         .andExpect(jsonPath("$.content[1].name", is("my house")))
         .andExpect(jsonPath("$.content[2].name", is("penthouse")))

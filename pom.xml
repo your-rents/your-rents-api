@@ -398,6 +398,14 @@
 									<excludes>flyway_schema_history</excludes>
 									<inputSchema>00000000-0000-0000-0000-000000000001</inputSchema>
 									<outputSchema>tenant</outputSchema>
+
+                  <forcedTypes>
+                    <forcedType>
+                      <userType>com.yourrents.api.property.PropertyType</userType>
+                      <binding>com.yourrents.api.config.PropertyTypeBinding</binding>
+                      <includeExpression>.*\.type</includeExpression>
+                    </forcedType>
+                  </forcedTypes>
 								</database>
 								<target>
 									<packageName>com.yourrents.api.jooq.tenant</packageName>
