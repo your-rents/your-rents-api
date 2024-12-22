@@ -1,4 +1,4 @@
-package com.yourrents.api.config;
+package com.yourrents.api.property;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package com.yourrents.api.config;
  * #L%
  */
 
-import com.yourrents.api.property.PropertyType;
 import java.sql.SQLException;
 import java.sql.Types;
 import org.jooq.BindingGetResultSetContext;
@@ -28,17 +27,28 @@ import org.jooq.BindingSQLContext;
 import org.jooq.BindingSetStatementContext;
 import org.jooq.Converter;
 import org.jooq.impl.AbstractBinding;
+import org.jooq.impl.EnumConverter;
 
 /**
  * A custom Binding for PostgreSQL ENUM types.
  */
 public class PropertyTypeBinding extends AbstractBinding<Object, PropertyType> {
+  private final Converter<Object, PropertyType> converter;
 
+  public PropertyTypeBinding() {
+    this.converter = new EnumConverter<>(Object.class, PropertyType.class){
+      @Override
+      public Object to(PropertyType propertyType) {
+        return propertyType.getTypeName();
+      }
+    };
+  }
 
   @Override
   public Converter<Object, PropertyType> converter() {
-    return new PropertyTypeConverter();
+    return this.converter;
   }
+
 
   @Override
   public void sql(BindingSQLContext<PropertyType> ctx) {
@@ -65,5 +75,8 @@ public class PropertyTypeBinding extends AbstractBinding<Object, PropertyType> {
         .getString(ctx.index()); // Get the String value from the ResultSet
     ctx.value(converter().from(value)); // Convert the String to PropertyType and set it
   }
-
 }
+
+
+
+

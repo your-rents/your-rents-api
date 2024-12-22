@@ -402,7 +402,7 @@
                   <forcedTypes>
                     <forcedType>
                       <userType>com.yourrents.api.property.PropertyType</userType>
-                      <binding>com.yourrents.api.config.PropertyTypeBinding</binding>
+                      <binding>com.yourrents.api.property.PropertyTypeBinding</binding>
                       <includeExpression>.*\.type</includeExpression>
                     </forcedType>
                   </forcedTypes>
