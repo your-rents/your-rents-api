@@ -35,6 +35,9 @@ import org.jooq.impl.EnumConverter;
 public class PropertyTypeBinding extends AbstractBinding<Object, PropertyType> {
   private final Converter<Object, PropertyType> converter;
 
+  static final String GLOBAL_PROPERTY_TYPE_SQL = "?::global.property_type";
+
+
   public PropertyTypeBinding() {
     this.converter = new EnumConverter<>(Object.class, PropertyType.class){
       @Override
@@ -53,7 +56,7 @@ public class PropertyTypeBinding extends AbstractBinding<Object, PropertyType> {
   @Override
   public void sql(BindingSQLContext<PropertyType> ctx) {
     // Add the SQL cast for PostgreSQL ENUM type
-    ctx.render().sql("?::global.property_type");
+    ctx.render().sql(GLOBAL_PROPERTY_TYPE_SQL);
   }
 
   @Override
