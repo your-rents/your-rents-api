@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.0</version>
+		<version>3.4.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.your-rents.api</groupId>
@@ -74,7 +74,7 @@
 		<springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-		<license-maven-plugin.version>2.4.0</license-maven-plugin.version>
+		<license-maven-plugin.version>2.5.0</license-maven-plugin.version>
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 		<spring-boot.version>3.4.0</spring-boot.version>
 		<springdoc-openapi-ui.version>2.7.0</springdoc-openapi-ui.version>
@@ -398,14 +398,13 @@
 									<excludes>flyway_schema_history</excludes>
 									<inputSchema>00000000-0000-0000-0000-000000000001</inputSchema>
 									<outputSchema>tenant</outputSchema>
-
-                  <forcedTypes>
-                    <forcedType>
-                      <userType>com.yourrents.api.property.PropertyType</userType>
-                      <binding>com.yourrents.api.property.PropertyTypeBinding</binding>
-                      <includeExpression>.*\.type</includeExpression>
-                    </forcedType>
-                  </forcedTypes>
+									<forcedTypes>
+										<forcedType>
+										<userType>com.yourrents.api.property.PropertyType</userType>
+										<binding>com.yourrents.api.property.PropertyTypeBinding</binding>
+										<includeExpression>.*\.type</includeExpression>
+										</forcedType>
+									</forcedTypes>
 								</database>
 								<target>
 									<packageName>com.yourrents.api.jooq.tenant</packageName>
