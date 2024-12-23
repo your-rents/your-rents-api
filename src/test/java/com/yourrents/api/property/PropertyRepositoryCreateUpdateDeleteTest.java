@@ -21,6 +21,8 @@ package com.yourrents.api.property;
  */
 
 
+import static com.yourrents.api.property.PropertyType.APARTMENT;
+import static com.yourrents.api.property.PropertyType.VILLA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -47,7 +49,6 @@ class PropertyRepositoryCreateUpdateDeleteTest {
 
   static final int ADDRESS_ID = 1000000000;
 
-  static final UUID PROPERTY_TYPE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   static final UUID PROPERTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
@@ -73,21 +74,19 @@ class PropertyRepositoryCreateUpdateDeleteTest {
   void add() {
     Address address = addressRepository.findById(ADDRESS_ID)
         .orElseThrow(RuntimeException::new);
-
-    Property newProperty = new Property(null, "p1",
-        new PropertyType(PROPERTY_TYPE_UUID, null, null, null),
-        "small flat", 1970, 45, address.uuid());
+    Property newProperty = new Property(null, "myP", APARTMENT, "small flat", 1990, 50,
+        address.uuid());
     Property result = propertyRepository.add(newProperty);
     assertThat(result).isNotNull();
     assertThat(result.uuid()).isNotNull();
-    assertThat(result.name()).isEqualTo("p1");
-    assertThat(result.type().uuid()).isEqualTo(PROPERTY_UUID);
+    assertThat(result.name()).isEqualTo("myP");
+    assertThat(result.type()).isEqualTo(APARTMENT);
     assertThat(result.description()).isEqualTo("small flat");
-    assertThat(result.yearOfBuild()).isEqualTo(1970);
-    assertThat(result.sizeMq()).isEqualTo(45);
+    assertThat(result.yearOfBuild()).isEqualTo(1990);
+    assertThat(result.sizeMq()).isEqualTo(50);
     assertThat(result.type()).isNotNull();
     assertThat(result.addressUuid()).isEqualTo(address.uuid());
-    assertThat(result.type().name()).isEqualTo("test type");
+    assertThat(result.type().getTypeName()).isEqualTo("Apartment");
   }
 
   @Test
@@ -111,7 +110,7 @@ class PropertyRepositoryCreateUpdateDeleteTest {
   void update() {
     UUID addressUuid = addressRepository.findById(ADDRESS_ID).map(Address::uuid).orElseThrow();
     Property updateProperty = new Property(null, "house",
-        new PropertyType(PROPERTY_TYPE_UUID, null, null, null),
+        PropertyType.VILLA,
         "small house", null,
         null,
         addressUuid);
@@ -123,8 +122,8 @@ class PropertyRepositoryCreateUpdateDeleteTest {
     assertThat(result.yearOfBuild()).isEqualTo(PROPERTY_YEAR_OF_BUILD);
     assertThat(result.name()).isEqualTo(updateProperty.name());
     assertThat(result.type()).isNotNull();
-    assertThat(result.type().uuid()).isEqualTo(PROPERTY_TYPE_UUID);
-    assertThat(result.type().name()).isEqualTo("test type");
+    assertThat(result.type()).isEqualTo(VILLA);
+    assertThat(result.type()).isEqualTo(VILLA);
   }
 
   @Test
@@ -137,15 +136,4 @@ class PropertyRepositoryCreateUpdateDeleteTest {
         .withMessageContaining("cannot find address with uuid: " + randomUUID);
   }
 
-  @Test
-  void updatePropertyWithAnInvalidType() {
-    Property property = propertyRepository.findById(1000000).get();
-    UUID randomUUID = UUID.randomUUID();
-    Property updateProperty = new Property(null, null,
-        new PropertyType(randomUUID, null, null, null),
-        "desc", null, null, null);
-    assertThatExceptionOfType(DataNotFoundException.class)
-        .isThrownBy(() -> propertyRepository.update(property.uuid(), updateProperty))
-        .withMessageContaining("cannot find property_type with uuid: " + randomUUID);
-  }
 }

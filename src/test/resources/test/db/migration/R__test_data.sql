@@ -43,8 +43,6 @@ VALUES (10000000, 'Demo Tenant', '00000000-0000-0000-0000-000000000001');
 INSERT INTO global.tenant_user (id, tenant_id, account_id)
 VALUES (10000001, 10000000, '00000000-0000-0000-0000-000000000002');
 
-INSERT INTO global.property_type (id, external_id, name, code, description)
-VALUES (1000000,  '00000000-0000-0000-0000-000000000001', 'test type', 'TTY', 'just a type for test');
 
 --test data for tenant
 CREATE SCHEMA "00000000-0000-0000-0000-000000000001";
@@ -56,7 +54,7 @@ CREATE TABLE property (
     name character varying(256) NOT NULL,
     address_id UUID,
     year_of_build integer,
-    type_id integer,
+    type global.property_type,
     description text,
     size_mq integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
@@ -67,9 +65,9 @@ ALTER TABLE ONLY property
 
 --test data for properties
 INSERT INTO property (id, name, description, external_id,
-                      address_id, year_of_build, size_mq, type_id)
+                      address_id, year_of_build, size_mq, type)
               VALUES (1000000, 'my flat', 'residential flat', '00000000-0000-0000-0000-000000000001',
-                      null, 1971, 100, 1000000),
+                      null, 1971, 100, 'Apartment'),
                      (1000001, 'my house', null, '00000000-0000-0000-0000-000000000002',
                       null, null, 45, null),
                      (1000002, 'penthouse', null, '00000000-0000-0000-0000-000000000003',

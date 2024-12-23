@@ -21,11 +21,8 @@ package com.yourrents.api.property;
  */
 
 
-import static com.yourrents.api.jooq.global.Tables.PROPERTY_TYPE;
 import static com.yourrents.api.jooq.tenant.tables.Property.PROPERTY;
-import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.Records.mapping;
-import static org.jooq.impl.DSL.row;
 
 import com.yourrents.api.jooq.tenant.tables.records.PropertyRecord;
 import com.yourrents.api.tenant.JooqTenantService;
@@ -75,14 +72,8 @@ public class PropertyRepository {
               "cannot find address with uuid: " + property.addressUuid()));
       addressUuid = property.addressUuid();
     }
-    Integer propertyTypeId = null;
-    if (property.type() != null && property.type().uuid() != null) {
-      propertyTypeId = findPropertyTypeId(property.type().uuid(), dsl);
-    }
     PropertyRecord newProperty = dsl.newRecord(PROPERTY);
-    if (propertyTypeId != null) {
-      newProperty.setTypeId(propertyTypeId);
-    }
+    newProperty.setType(property.type());
     newProperty.setName(property.name());
     newProperty.setDescription(property.description());
     if (property.yearOfBuild() != null && property.yearOfBuild() < 0) {
@@ -125,9 +116,8 @@ public class PropertyRepository {
       propertyRecord.setAddressId(property.addressUuid());
     }
 
-    if (property.type() != null && property.type().uuid() != null) {
-      final Integer propertyTypeId = findPropertyTypeId(property.type().uuid(), dsl);
-      propertyRecord.setTypeId(propertyTypeId);
+    if (property.type() != null) {
+      propertyRecord.setType(property.type());
     }
     if (property.name() != null) {
       propertyRecord.setName(property.name());
@@ -191,14 +181,7 @@ public class PropertyRepository {
     return new PageImpl<>(properties, pageable, totalRows);
   }
 
-  private Integer findPropertyTypeId(UUID propertyTypeUuid, DSLContext dsl) {
-    return dsl.select(PROPERTY_TYPE.ID)
-        .from(PROPERTY_TYPE)
-        .where(PROPERTY_TYPE.EXTERNAL_ID.eq(propertyTypeUuid))
-        .fetchOptional(PROPERTY_TYPE.ID).orElseThrow(
-            () -> new DataNotFoundException(
-                "cannot find property_type with uuid: " + propertyTypeUuid));
-  }
+
 
   private SelectJoinStep<Record7<UUID, String, PropertyType, String, Integer, Integer, UUID>> getSelectPropertySpec(
       DSLContext tenantDsl) {
@@ -206,15 +189,14 @@ public class PropertyRepository {
         .select(
             PROPERTY.EXTERNAL_ID.as("uuid"),
             PROPERTY.NAME.as("name"),
-            row(PROPERTY_TYPE.EXTERNAL_ID, PROPERTY_TYPE.NAME, PROPERTY_TYPE.CODE,
-                PROPERTY_TYPE.DESCRIPTION)
-                .mapping(nullOnAllNull(PropertyType::new)).as("type"),
+            PROPERTY.TYPE.as("type"),
+
             PROPERTY.DESCRIPTION.as("description"),
             PROPERTY.YEAR_OF_BUILD.as("yearOfBuild"),
             PROPERTY.SIZE_MQ.as("sizeMq"),
             PROPERTY.ADDRESS_ID.as("addressUuid"))
-        .from(PROPERTY)
-        .leftJoin(PROPERTY_TYPE).on(PROPERTY_TYPE.ID.eq(PROPERTY.TYPE_ID));
+        .from(PROPERTY);
+
   }
 
   private Field<?> getSupportedSortField(String field) {

@@ -23,6 +23,7 @@ package com.yourrents.api.property;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,9 +51,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PropertyControllerCreateUpdateValidationTest {
 
-  static final String PROPERTY_TYPE_UUID = "00000000-0000-0000-0000-000000000001";
-
-  static final String ADDRESS_UUID = "00000000-0000-0000-0000-000000000001";
 
   static final String ACCOUNT_UUID = "00000000-0000-0000-0000-000000000002";
 
@@ -81,15 +79,13 @@ class PropertyControllerCreateUpdateValidationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                  "type": {
-                    "uuid": "%s"
-                  }
+                  "type": "%s"
                 }
-                """.formatted(PROPERTY_TYPE_UUID)
+                """.formatted(PropertyType.APARTMENT.name())
             ))
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.name", is(Property.NAME_NOT_NULL_CONSTRAINT)))
-        // .andDo(print())
+        .andDo(print())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
