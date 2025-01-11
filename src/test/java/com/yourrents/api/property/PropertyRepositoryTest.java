@@ -32,6 +32,7 @@ import com.yourrents.services.common.searchable.FilterCriteria;
 import com.yourrents.services.geodata.repository.AddressRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,5 +99,30 @@ class PropertyRepositoryTest {
     Property property = page.getContent().get(0);
     assertThat(property, notNullValue());
     assertThat(property.name(), equalTo("my flat"));
+  }
+
+  @Test
+  @Disabled
+  void findFilteredByType() {
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("name")));
+    FilterCriteria filter = FilterCriteria.of(
+        FilterCondition.of("type", "eq", "Apartment"));
+    Page<Property> page = propertyRepository.find(filter, pageable);
+    assertThat(page, iterableWithSize(1));
+    Property property = page.getContent().get(0);
+    assertThat(property, notNullValue());
+    assertThat(property.name(), equalTo("my flat"));
+  }
+
+  @Test
+  void findFilteredByTypeContainsIgnoreCase() {
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("name")));
+    FilterCriteria filter = FilterCriteria.of(
+        FilterCondition.of("type", "containsIgnoreCase", "HOUSE"));
+    Page<Property> page = propertyRepository.find(filter, pageable);
+    assertThat(page, iterableWithSize(2));
+    Property property = page.getContent().get(0);
+    assertThat(property, notNullValue());
+    assertThat(property.name(), equalTo("my house"));
   }
 }

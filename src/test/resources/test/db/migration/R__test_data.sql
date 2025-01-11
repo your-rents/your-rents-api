@@ -69,6 +69,6 @@ INSERT INTO property (id, name, description, external_id,
               VALUES (1000000, 'my flat', 'residential flat', '00000000-0000-0000-0000-000000000001',
                       null, 1971, 100, 'Apartment'),
                      (1000001, 'my house', null, '00000000-0000-0000-0000-000000000002',
-                      null, null, 45, null),
+                      null, null, 45, 'House'),
                      (1000002, 'penthouse', null, '00000000-0000-0000-0000-000000000003',
-                      '00000000-0000-0000-0000-000000000004', 1980, null, null);
+                      '00000000-0000-0000-0000-000000000004', 1980, null, 'Penthouse');

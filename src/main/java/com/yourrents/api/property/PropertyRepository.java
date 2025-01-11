@@ -202,6 +202,7 @@ public class PropertyRepository {
   private Field<?> getSupportedSortField(String field) {
     return switch (field) {
       case "name" -> PROPERTY.NAME;
+      case "type" -> PROPERTY.TYPE;
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
     };
