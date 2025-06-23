@@ -1,5 +1,9 @@
 package com.yourrents.api.security;
 
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * YourRents API
@@ -24,67 +28,77 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.yourrents.api.tenant.TenantFilter;
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration {
+  private static final Logger log = LoggerFactory.getLogger(SecurityConfiguration.class);
 
-        private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
+  private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
 
-        private final String allowedOrigins;
+  private final String allowedOrigins;
 
-        SecurityConfiguration(TokenConverterProperties properties,
-                        @Value("${yrs-api.cors.allowed-origins}") String allowedOrigins) {
-                JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
-                                new JwtGrantedAuthoritiesConverter();
-                this.keycloakJwtTokenConverter = new KeycloakJwtTokenConverter(
-                                jwtGrantedAuthoritiesConverter, properties);
-                this.allowedOrigins = allowedOrigins;
-        }
+  @Value("${spring.websecurity.debug:false}")
+  private boolean webSecurityDebug;  
 
-        @Bean
-        public FilterRegistrationBean<TenantFilter> tenantFilterRegistration(TenantFilter filter) {
-                FilterRegistrationBean<TenantFilter> registration =
-                                new FilterRegistrationBean<>(filter);
-                registration.setEnabled(false);
-                return registration;
-        }
+  SecurityConfiguration(TokenConverterProperties properties,
+      @Value("${yrs-api.cors.allowed-origins}") String allowedOrigins) {
+    JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
+        new JwtGrantedAuthoritiesConverter();
+    this.keycloakJwtTokenConverter =
+        new KeycloakJwtTokenConverter(jwtGrantedAuthoritiesConverter, properties);
+    this.allowedOrigins = allowedOrigins;
+  }
 
-        @Bean
-        SecurityFilterChain securityFilterChain(HttpSecurity http, TenantFilter tenantFilter)
-                        throws Exception {
-                return http.csrf(csrf -> csrf.disable())
-                                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                                                .requestMatchers("/actuator/**").permitAll()
-                                                .requestMatchers("/api/**").hasRole("USER")
-                                                .anyRequest().permitAll())
-                                .oauth2ResourceServer(oauth2 -> oauth2
-                                                .jwt(jwt -> jwt.jwtAuthenticationConverter(
-                                                                keycloakJwtTokenConverter)))
-                                .sessionManagement(session -> session.sessionCreationPolicy(
-                                                SessionCreationPolicy.IF_REQUIRED))
-                                .addFilterBefore(tenantFilter, AuthorizationFilter.class)
-                                .build();
-        }
+  @Bean
+  WebSecurityCustomizer webSecurityCustomizer() {
+    return (web) -> web.debug(webSecurityDebug);
+  }
 
-        @Bean
-        WebMvcConfigurer corsConfigurer() {
-                return new WebMvcConfigurer() {
-                        @Override
-                        public void addCorsMappings(CorsRegistry registry) {
-                                registry.addMapping("/**").allowedOrigins(allowedOrigins.split(","))
-                                                .allowedMethods("GET", "POST", "PUT", "PATCH",
-                                                                "DELETE");
-                        }
-                };
-        }
+  @Bean
+  FilterRegistrationBean<TenantFilter> tenantFilterRegistration(TenantFilter filter) {
+    FilterRegistrationBean<TenantFilter> registration = new FilterRegistrationBean<>(filter);
+    registration.setEnabled(false);
+    return registration;
+  }
+
+  @Bean
+  SecurityFilterChain securityFilterChain(HttpSecurity http, TenantFilter tenantFilter)
+      throws Exception {
+    return http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults())
+        .authorizeHttpRequests(
+            authorizeRequests -> authorizeRequests.requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/**").hasRole("USER").anyRequest().permitAll())
+        .oauth2ResourceServer(
+            oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtTokenConverter)))
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .addFilterBefore(tenantFilter, AuthorizationFilter.class).build();
+  }
+
+
+  @Bean
+  CorsConfigurationSource corsConfigurationSource() {
+    log.info("Configuring CORS with allowed origins: {}", allowedOrigins);
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+    configuration.setAllowedMethods(Arrays.asList("*"));
+    configuration.setAllowedHeaders(Arrays.asList("*"));
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
 }

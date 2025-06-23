@@ -28,5 +28,15 @@
     "name": "token.converter.principal-attribute",
     "type": "java.lang.String",
     "description": "The attribute of the token that should be used as the principal"
+  },
+  {
+    "name": "token.converter.resource-id",
+    "type": "java.lang.String",
+    "description": "The resource ID that should be used in the token converter"
+  },
+  {
+    "name": "spring.websecurity.debug",
+    "type": "java.lang.String",
+    "description": "Enable or disable debug mode for Spring Web Security. When enabled, it will log security-related information to the console."
   }
 ]}
