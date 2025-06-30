@@ -24,7 +24,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.notNullValue;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yourrents.api.TestYourRentsApiApplication;
 import com.yourrents.api.security.PrincipalAccessor;
 import com.yourrents.services.common.searchable.FilterCondition;
@@ -56,6 +59,9 @@ class PropertyRepositoryTest {
   PropertyRepository propertyRepository;
 
   @Autowired
+  ObjectMapper objectMapper;
+
+  @Autowired
   AddressRepository addressRepository;
 
   @MockitoBean
@@ -74,10 +80,16 @@ class PropertyRepositoryTest {
   }
 
   @Test
-  void findById() {
+  void findById() throws JsonMappingException, JsonProcessingException {
     Property property = propertyRepository.findById(1000000).orElseThrow();
     assertThat(property, notNullValue());
     assertThat(property.uuid(), equalTo(UUID.fromString("00000000-0000-0000-0000-000000000001")));
+    JsonNode tree = objectMapper.readTree(property.landRegistry());
+    String jsonField = tree.get("foglio").asText();
+    assertThat(jsonField, equalTo("AD/61"));
+
+    // String jsonField = tree.get("format").asText();// objectMapper.readTree( "{ \"genres\": [\"Fiction\", \"Spirituality\"], \"authors\": [\"Herman Hesse\"], \"format\": \"softcover\"}";
+    // assertThat(jsonField, equalTo("softcover"));
   }
 
   @Test

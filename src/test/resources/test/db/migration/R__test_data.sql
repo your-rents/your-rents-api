@@ -57,6 +57,7 @@ CREATE TABLE property (
     type global.property_type,
     description text,
     size_mq integer,
+    land_registry jsonb, 
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
@@ -65,10 +66,10 @@ ALTER TABLE ONLY property
 
 --test data for properties
 INSERT INTO property (id, name, description, external_id,
-                      address_id, year_of_build, size_mq, type)
+                      address_id, year_of_build, size_mq, land_registry, type)
               VALUES (1000000, 'my flat', 'residential flat', '00000000-0000-0000-0000-000000000001',
-                      null, 1971, 100, 'Apartment'),
+                      null, 1971, 100, '{ "locale": "IT/ITA", "foglio": "AD/61", "particella": "688", "sub": "6", "categoria":"C/6", "classe": "02", "consistenza":"15mq", "rendita": "51,13"}', 'Apartment'),
                      (1000001, 'my house', null, '00000000-0000-0000-0000-000000000002',
-                      null, null, 45, null),
+                      null, null, 45, null, null),
                      (1000002, 'penthouse', null, '00000000-0000-0000-0000-000000000003',
-                      '00000000-0000-0000-0000-000000000004', 1980, null, null);
+                      '00000000-0000-0000-0000-000000000004', 1980, null, null, null);

@@ -28,5 +28,6 @@ CREATE TABLE property (
     type global.property_type,
     description text,
     size_mq integer,
+    land_registry jsonb, 
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );

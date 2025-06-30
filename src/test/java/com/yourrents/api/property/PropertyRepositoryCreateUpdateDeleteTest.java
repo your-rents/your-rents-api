@@ -74,7 +74,7 @@ class PropertyRepositoryCreateUpdateDeleteTest {
   void add() {
     Address address = addressRepository.findById(ADDRESS_ID)
         .orElseThrow(RuntimeException::new);
-    Property newProperty = new Property(null, "myP", APARTMENT, "small flat", 1990, 50,
+    Property newProperty = new Property(null, "myP", APARTMENT, "small flat", 1990, 50, null,
         address.uuid());
     Property result = propertyRepository.add(newProperty);
     assertThat(result).isNotNull();
@@ -113,6 +113,7 @@ class PropertyRepositoryCreateUpdateDeleteTest {
         PropertyType.VILLA,
         "small house", null,
         null,
+        null,
         addressUuid);
     Property result = propertyRepository.update(PROPERTY_UUID, updateProperty);
     assertThat(result).isNotNull();
@@ -130,7 +131,7 @@ class PropertyRepositoryCreateUpdateDeleteTest {
   void updatePropertyWithAnInvalidAddress() {
     Property property = propertyRepository.findById(1000000).get();
     UUID randomUUID = UUID.randomUUID();
-    Property updateProperty = new Property(null, null, null, "desc", null, null, randomUUID);
+    Property updateProperty = new Property(null, null, null, "desc", null, null, null, randomUUID);
     assertThatExceptionOfType(DataNotFoundException.class)
         .isThrownBy(() -> propertyRepository.update(property.uuid(), updateProperty))
         .withMessageContaining("cannot find address with uuid: " + randomUUID);

@@ -51,7 +51,9 @@ public record Property(UUID uuid,
                            groups = {ValidationGroups.Post.class, ValidationGroups.Patch.class})
                        Integer sizeMq,
 
-                       UUID addressUuid) {
+                      String landRegistry,
+
+                      UUID addressUuid) {
 
   static final String NAME_NOT_NULL_CONSTRAINT = "name must not be null";
   static final String NAME_CONSTRAINT = "name must be between 3 and 50 characters";

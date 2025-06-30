@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record7;
+import org.jooq.Record8;
 import org.jooq.Select;
 import org.jooq.SelectJoinStep;
 import org.springframework.data.domain.Page;
@@ -174,6 +174,7 @@ public class PropertyRepository {
             r.get("description", String.class),
             r.get("yearOfBuild", Integer.class),
             r.get("sizeMq", Integer.class),
+            r.get("landRegistry", String.class),
             r.get("addressUuid", UUID.class))
     );
     int totalRows = Objects.requireNonNullElse(
@@ -183,7 +184,7 @@ public class PropertyRepository {
 
 
 
-  private SelectJoinStep<Record7<UUID, String, PropertyType, String, Integer, Integer, UUID>> getSelectPropertySpec(
+  private SelectJoinStep<Record8<UUID, String, PropertyType, String, Integer, Integer, String, UUID>> getSelectPropertySpec(
       DSLContext tenantDsl) {
     return tenantDsl
         .select(
@@ -194,6 +195,7 @@ public class PropertyRepository {
             PROPERTY.DESCRIPTION.as("description"),
             PROPERTY.YEAR_OF_BUILD.as("yearOfBuild"),
             PROPERTY.SIZE_MQ.as("sizeMq"),
+            PROPERTY.LAND_REGISTRY.cast(String.class).as("landRegistry"),
             PROPERTY.ADDRESS_ID.as("addressUuid"))
         .from(PROPERTY);
 
