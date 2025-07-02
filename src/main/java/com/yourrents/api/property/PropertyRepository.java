@@ -39,6 +39,7 @@ import org.jooq.Field;
 import org.jooq.Record8;
 import org.jooq.Select;
 import org.jooq.SelectJoinStep;
+import org.jooq.JSONB;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -84,6 +85,7 @@ public class PropertyRepository {
       throw new IllegalArgumentException("sizeMq must be a positive integer");
     }
     newProperty.setSizeMq(property.sizeMq());
+    newProperty.setLandRegistry(JSONB.jsonbOrNull(property.landRegistry()));
     newProperty.setAddressId(addressUuid);
     newProperty.insert();
     return findById(newProperty.getId()).orElseThrow();
@@ -137,6 +139,7 @@ public class PropertyRepository {
       }
       propertyRecord.setSizeMq(property.sizeMq());
     }
+    propertyRecord.setLandRegistry(JSONB.jsonbOrNull(property.landRegistry()));
     propertyRecord.update();
     return findById(propertyRecord.getId())
         .orElseThrow(() -> new RuntimeException("failed to update property: " + uuid));

@@ -113,7 +113,7 @@ class PropertyRepositoryCreateUpdateDeleteTest {
         PropertyType.VILLA,
         "small house", null,
         null,
-        null,
+        "{\"sub\": \"12\"}",
         addressUuid);
     Property result = propertyRepository.update(PROPERTY_UUID, updateProperty);
     assertThat(result).isNotNull();
@@ -124,7 +124,7 @@ class PropertyRepositoryCreateUpdateDeleteTest {
     assertThat(result.name()).isEqualTo(updateProperty.name());
     assertThat(result.type()).isNotNull();
     assertThat(result.type()).isEqualTo(VILLA);
-    assertThat(result.type()).isEqualTo(VILLA);
+    assertThat(result.landRegistry()).isEqualTo("{\"sub\": \"12\"}");
   }
 
   @Test

@@ -87,9 +87,6 @@ class PropertyRepositoryTest {
     JsonNode tree = objectMapper.readTree(property.landRegistry());
     String jsonField = tree.get("foglio").asText();
     assertThat(jsonField, equalTo("AD/61"));
-
-    // String jsonField = tree.get("format").asText();// objectMapper.readTree( "{ \"genres\": [\"Fiction\", \"Spirituality\"], \"authors\": [\"Herman Hesse\"], \"format\": \"softcover\"}";
-    // assertThat(jsonField, equalTo("softcover"));
   }
 
   @Test

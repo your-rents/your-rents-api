@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.yourrents.api.TestYourRentsApiApplication;
 import com.yourrents.api.security.PrincipalAccessor;
 import com.yourrents.services.geodata.repository.AddressRepository;
@@ -88,10 +87,7 @@ class PropertyControllerCreateUpdateDeleteTest {
                    "description": "vacation real estate",
                    "yearOfBuild": 2015,
                    "sizeMq": 90,
-                   "landRegistry": {
-                      "locale": "IT/ITA",
-                      "foglio": "AD/61"
-                    },
+                   "landRegistry": "{\\"locale\\": \\"IT/ITA\\", \\"foglio\\": \\"AD/61\\" }",
                    "addressUuid": "%s"
                 }
                 """.formatted(ADDRESS_UUID)))
@@ -99,17 +95,8 @@ class PropertyControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.name", is("My House in London")))
         .andExpect(jsonPath("$.uuid").isNotEmpty())
         .andExpect(jsonPath("$.type", is(PropertyType.APARTMENT.name())))
+        // .andExpect(jsonPath("$.landRegistry").isNotEmpty())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-
-
-/*
-  "nested": {
-   "deeply": {
-      "key": "Wow, this key is nested even deeper."
-   },
-   "key": "This key is nested inside a namespace."
-  }, 
-*/
 
   }
 
