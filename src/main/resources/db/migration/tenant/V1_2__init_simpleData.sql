@@ -1,0 +1,2 @@
+INSERT INTO property (id, name, address_id, year_of_build, type, description, size_mq, land_registry, external_id) 
+VALUES (1000000,	'my flat',	NULL,	1971,	'Apartment',	'residential flat',	100,	'{"sub": "6", "classe": "02", "foglio": "AD/61", "country": "IT", "rendita": "51,13euro", "categoria": "Cat.C/6", "particella": "668", "ubicazione": "via De Gasperi, 54 - PT", "classamento": "", "consistenza": "15mq"}',	'00000000-0000-0000-0000-000000000001');

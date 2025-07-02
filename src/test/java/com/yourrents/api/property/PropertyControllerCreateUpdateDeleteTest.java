@@ -87,7 +87,7 @@ class PropertyControllerCreateUpdateDeleteTest {
                    "description": "vacation real estate",
                    "yearOfBuild": 2015,
                    "sizeMq": 90,
-                   "landRegistry": "{\\"locale\\": \\"IT/ITA\\", \\"foglio\\": \\"AD/61\\" }",
+                   "landRegistry": "{\\"country\\": \\"IT\\", \\"foglio\\": \\"AD/61\\" }",
                    "addressUuid": "%s"
                 }
                 """.formatted(ADDRESS_UUID)))
@@ -95,7 +95,7 @@ class PropertyControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.name", is("My House in London")))
         .andExpect(jsonPath("$.uuid").isNotEmpty())
         .andExpect(jsonPath("$.type", is(PropertyType.APARTMENT.name())))
-        // .andExpect(jsonPath("$.landRegistry").isNotEmpty())
+        .andExpect(jsonPath("$.landRegistry").isNotEmpty())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
   }

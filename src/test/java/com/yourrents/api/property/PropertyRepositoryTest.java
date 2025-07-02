@@ -26,9 +26,9 @@ import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.notNullValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yourrents.api.TestYourRentsApiApplication;
+import com.yourrents.api.property.landRegistries.ItalianRegistryData;
 import com.yourrents.api.security.PrincipalAccessor;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
@@ -84,8 +84,8 @@ class PropertyRepositoryTest {
     Property property = propertyRepository.findById(1000000).orElseThrow();
     assertThat(property, notNullValue());
     assertThat(property.uuid(), equalTo(UUID.fromString("00000000-0000-0000-0000-000000000001")));
-    JsonNode tree = objectMapper.readTree(property.landRegistry());
-    String jsonField = tree.get("foglio").asText();
+    ItalianRegistryData landRegistryItaly = objectMapper.readValue(property.landRegistry(), ItalianRegistryData.class);
+    String jsonField = landRegistryItaly.foglio();
     assertThat(jsonField, equalTo("AD/61"));
   }
 
