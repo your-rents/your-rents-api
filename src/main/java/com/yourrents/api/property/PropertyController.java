@@ -22,6 +22,7 @@ package com.yourrents.api.property;
 
 
 import com.yourrents.api.exception.ValidationGroups;
+import com.yourrents.api.tenant.TenantService;
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.UUID;
@@ -48,9 +49,11 @@ import org.springframework.web.bind.annotation.RestController;
 class PropertyController {
 
   private final PropertyRepository propertyRepository;
+  private final TenantService tenantService;
 
-  PropertyController(PropertyRepository propertyRepository) {
+  PropertyController(PropertyRepository propertyRepository, TenantService tenantService) {
     this.propertyRepository = propertyRepository;
+    this.tenantService = tenantService;
   }
 
 
@@ -69,6 +72,11 @@ class PropertyController {
         .orElseThrow(
             () -> new DataNotFoundException("can't find property having uuid: " + uuid));
     return ResponseEntity.ok(property);
+  }
+
+  @GetMapping("/loadDemoData")
+  void loadDemoData() {
+    tenantService.initTenantDemoData();
   }
 
   @PostMapping

@@ -48,4 +48,10 @@ public class TenantService {
         tenantRepository.linkTenantToUser(tenant.uuid(), UUID.fromString(accountId));
         tenantRepository.initTenantSchema(tenant.uuid());
     }
+
+    @Transactional
+    public void initTenantDemoData() {
+        String tenantUUID = getTenantId();
+        tenantRepository.initTenantDemoData(UUID.fromString(tenantUUID));
+    }
 }

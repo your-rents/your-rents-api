@@ -104,6 +104,17 @@ public class TenantRepository {
         }
     }
 
+    @Transactional(readOnly = false)
+    public void initTenantDemoData(UUID tenantExtenalId) {
+        if (existsTenantSchema(tenantExtenalId)) {
+            Flyway currentModule = Flyway.configure()
+               .schemas(tenantExtenalId.toString())
+               .locations("db/migration/demo")
+               .dataSource(dataSource).load();
+                currentModule.migrate();
+        }
+    }    
+
     private Integer getTenantId(UUID tenantExternalId) {
         Integer tenantId = dsl.select(TENANT.ID)
             .from(TENANT)
@@ -112,4 +123,6 @@ public class TenantRepository {
             .orElseThrow(() -> new DataNotFoundException("Tenant not found"));
         return tenantId;
     }
+
+
 }

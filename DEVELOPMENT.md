@@ -19,3 +19,10 @@ docker exec -it your-rents-api-keycloak-1 /opt/keycloak/bin/kc.sh \
 ```
 
 See this  article [Export and import keycloak realm with users](https://simonscholz.github.io/tutorials/keycloak-realm-export-import#exporting-a-keycloak-realm-including-users-and-roles) for more information.
+
+## Loading demo data
+
+call the service:
+```/api/v1/yourrents/properties/loadDemoData```
+
+if you need repeat the call, you must delete in the flyway_schema_history the entry with description `init demo data`
